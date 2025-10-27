@@ -1,0 +1,29 @@
+[
+  {
+    "id": "40404040-dddd-eeee-ffff-444444444444",
+    "projectId": "99999999-8888-7777-6666-555555555555",
+    "roleId": "10101010-aaaa-bbbb-cccc-111111111111",
+    "name": "Jamie Rivera",
+    "vendor": null,
+    "fteCapacity": 1,
+    "costRate": 190
+  },
+  {
+    "id": "50505050-eeee-ffff-0000-555555555555",
+    "projectId": "99999999-8888-7777-6666-555555555555",
+    "roleId": "20202020-bbbb-cccc-dddd-222222222222",
+    "name": "Taylor Singh",
+    "vendor": null,
+    "fteCapacity": 0.8,
+    "costRate": 175
+  },
+  {
+    "id": "60606060-ffff-0000-1111-666666666666",
+    "projectId": "99999999-8888-7777-6666-555555555555",
+    "roleId": "30303030-cccc-dddd-eeee-333333333333",
+    "name": "Northwind Integrations",
+    "vendor": "Northwind",
+    "fteCapacity": 1,
+    "costRate": 220
+  }
+]
