@@ -1,58 +1,117 @@
-export function App(): JSX.Element {
-  return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
-      <header className="border-b border-slate-800 bg-slate-900/60 backdrop-blur">
-        <div className="mx-auto flex max-w-4xl items-center justify-between px-6 py-4">
-          <h1 className="text-xl font-semibold tracking-tight">PM0 Starter</h1>
-          <span className="rounded-full border border-slate-700 px-3 py-1 text-xs uppercase tracking-widest text-slate-300">
-            React + Vite
-          </span>
-        </div>
-      </header>
+import React, { useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { AuthGate } from './features/auth/AuthGate';
+import { ResourceManager } from './features/resources/ResourceManager';
+import { HeatmapPlanner } from './features/heatmap/HeatmapPlanner';
+import { ScenarioGenerator } from './features/scenarios/ScenarioGenerator';
+import { EstimationEngine } from './features/estimation/EstimationEngine';
+import { ExportCenter } from './features/exports/ExportCenter';
+import { ReadinessChecklist } from './features/readiness/ReadinessChecklist';
+import { useResourceDataSource } from './features/resources/api';
+import { useProjectStore } from './store/useProjectStore';
+import { LoadingOverlay } from './components/LoadingOverlay';
+import { Supabase, useSupabaseAuth } from './features/auth/SupabaseAuthProvider';
+import { useFeatureFlags } from './store/useFeatureFlags';
 
-      <main className="mx-auto flex max-w-4xl flex-1 flex-col gap-6 px-6 py-12">
-        <section className="rounded-2xl border border-slate-800 bg-slate-900/50 p-8 shadow-lg shadow-slate-950/40">
-          <h2 className="text-2xl font-semibold">Welcome to PM0</h2>
-          <p className="mt-3 text-slate-300">
-            Get started by editing <code className="rounded bg-slate-800 px-1.5 py-0.5">src/App.tsx</code> and save to
-            reload.
-          </p>
-        </section>
+const heatmapQueryKey = ['heatmap'];
+const scenariosQueryKey = ['scenarios'];
+
+const DashboardShell: React.FC = () => {
+  const { setHeatmap, setScenarios } = useProjectStore((state) => ({
+    setHeatmap: state.setHeatmap,
+    setScenarios: state.setScenarios,
+  }));
+  const { fetchHeatmap, fetchScenarios } = useResourceDataSource();
+  const heatmapQuery = useQuery({ queryKey: heatmapQueryKey, queryFn: fetchHeatmap });
+  const scenariosQuery = useQuery({ queryKey: scenariosQueryKey, queryFn: fetchScenarios });
+  const { useDemoData } = useFeatureFlags();
+
+  useEffect(() => {
+    if (heatmapQuery.data) {
+      setHeatmap(heatmapQuery.data);
+    }
+  }, [heatmapQuery.data, setHeatmap]);
+
+  useEffect(() => {
+    if (scenariosQuery.data) {
+      setScenarios(scenariosQuery.data);
+    }
+  }, [scenariosQuery.data, setScenarios]);
+
+  if ((heatmapQuery.isLoading || scenariosQuery.isLoading) && !useDemoData) {
+    return <LoadingOverlay label="Loading portfolio data…" />;
+  }
+
+  if (heatmapQuery.error || scenariosQuery.error) {
+    return (
+      <div className="p-6 text-sm text-rose-600">
+        Failed to load data. Verify Supabase credentials and RLS policies.
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-slate-100">
+      <Header />
+      <main className="mx-auto flex w-full max-w-6xl flex-col gap-6 p-6">
+        <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
+          <HeatmapPlanner />
+          <ReadinessChecklist />
+        </div>
+        <EstimationEngine />
+        <ScenarioGenerator />
+        <ResourceManager />
+        <ExportCenter />
       </main>
     </div>
   );
-}
+};
 
-        <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-xl font-semibold text-slate-800">Runtime flags</h2>
-          <dl className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <ConfigItem label="Demo mode" value={isDemoMode ? 'enabled' : 'disabled'} />
-            <ConfigItem label="Sentry DSN" value={sentryDsn ?? null} />
-          </dl>
-        </section>
+const Header: React.FC = () => {
+  const { session } = useSupabaseAuth();
+  const { useDemoData } = useFeatureFlags();
 
-        <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-xl font-semibold text-slate-800">Supabase connection</h2>
-          {isDemoMode ? (
-            <p className="mt-2 text-sm text-slate-600">
-              Supabase is bypassed because <code>VITE_USE_DEMO_DATA</code> is enabled. Disable demo mode to connect to your project
-              using the values below.
-            </p>
+  const handleSignOut = () => {
+    if (useDemoData) return;
+    Supabase.auth.signOut();
+  };
+
+  return (
+    <header className="border-b border-slate-200 bg-white">
+      <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4">
+        <div>
+          <h1 className="text-xl font-semibold text-slate-900">PM0 Planning Workspace</h1>
+          <p className="text-xs text-slate-500">
+            Heatmap-driven staffing, scenario modeling, and export center built on Supabase and Vercel.
+          </p>
+        </div>
+        <div className="flex items-center gap-3 text-xs text-slate-600">
+          {useDemoData ? (
+            <span className="rounded-full bg-amber-100 px-3 py-1 font-semibold text-amber-800">Demo Mode</span>
           ) : (
-            <p className="mt-2 text-sm text-slate-600">
-              Supabase will initialise with the configured URL and anon key. Update these variables in your environment to point to
-              the correct workspace.
-            </p>
+            <>
+              <span>{session?.user.email}</span>
+              <button
+                type="button"
+                onClick={handleSignOut}
+                className="rounded-md bg-slate-900 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-800"
+              >
+                Sign Out
+              </button>
+            </>
           )}
-          <dl className="mt-4 grid grid-cols-1 gap-4">
-            <ConfigItem label="VITE_SUPABASE_URL" value={env.supabaseUrl} />
-            <ConfigItem
-              label="VITE_SUPABASE_ANON_KEY"
-              value={env.supabaseAnonKey ? `${env.supabaseAnonKey.slice(0, 6)}…${env.supabaseAnonKey.slice(-4)}` : null}
-            />
-          </dl>
-        </section>
+        </div>
       </div>
-    </main>
-  )
-}
+    </header>
+  );
+};
+
+const App: React.FC = () => {
+  return (
+    <AuthGate>
+      <DashboardShell />
+    </AuthGate>
+  );
+};
+
+export default App;

@@ -1,17 +1,28 @@
-import { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import App from './App';
+import { SupabaseAuthProvider } from './features/auth/SupabaseAuthProvider';
+import { FeatureFlagProvider } from './store/useFeatureFlags';
 
-import App from './App.tsx';
-import './index.css';
+const queryClient = new QueryClient();
 
 const container = document.getElementById('root');
 
 if (!container) {
-  throw new Error('Root container element with id "root" was not found.');
+  throw new Error('Root element "#root" not found. Ensure index.html contains <div id="root"></div>.');
 }
 
-createRoot(container).render(
-  <StrictMode>
-    <App />
-  </StrictMode>
+const root = ReactDOM.createRoot(container);
+
+root.render(
+  <React.StrictMode>
+    <FeatureFlagProvider>
+      <QueryClientProvider client={queryClient}>
+        <SupabaseAuthProvider>
+          <App />
+        </SupabaseAuthProvider>
+      </QueryClientProvider>
+    </FeatureFlagProvider>
+  </React.StrictMode>,
 );
