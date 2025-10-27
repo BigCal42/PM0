@@ -5,13 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "npm run typegen && vite build",
     "preview": "vite preview",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test:e2e": "playwright test",
-    "test:e2e:ci": "playwright test --reporter=line",
-    "typegen": "bash scripts/typegen.sh"
+    "typegen": "./scripts/typegen.sh"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4",
