@@ -4,44 +4,41 @@ on:
   push:
     branches:
       - main
-
-permissions:
-  contents: write
-  issues: write
-  pull-requests: write
+  workflow_dispatch:
 
 jobs:
-  release:
+  semantic-release:
+    name: Semantic Release
     runs-on: ubuntu-latest
-
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      - name: Setup Node.js
+      - name: Use Node.js 22
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-
-      - name: Cache node_modules
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.npm
-            node_modules
-          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json', 'package.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
+          node-version: 22
+          cache: npm
 
       - name: Install dependencies
-        run: npm install --no-audit --no-fund
+        run: npm ci
 
-      - name: Run tests
-        run: npm test
+      - name: Install semantic-release tooling
+        run: |
+          npm install --no-save \
+            semantic-release@24.1.0 \
+            @semantic-release/changelog@6.0.3 \
+            @semantic-release/commit-analyzer@13.0.0 \
+            @semantic-release/git@10.0.1 \
+            @semantic-release/github@10.3.3 \
+            @semantic-release/npm@11.0.3 \
+            @semantic-release/release-notes-generator@14.0.1
 
-      - name: Semantic release
+      - name: Run semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm run release
+        run: npx semantic-release
