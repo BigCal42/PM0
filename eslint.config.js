@@ -1,46 +1,33 @@
-import js from '@eslint/js'
-import globals from 'globals'
-import path from 'node:path'
-import { fileURLToPath } from 'node:url'
+import js from '@eslint/js';
+import reactPlugin from 'eslint-plugin-react';
+import reactHooks from 'eslint-plugin-react-hooks';
+import tseslint from 'typescript-eslint';
 
-import reactRecommended from './config/eslint/react-recommended.js'
-import { typescriptRecommended } from './config/eslint/typescript-recommended.js'
-import viteRecommended from './config/eslint/vite-recommended.js'
-
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
-
-export default [
+export default tseslint.config(
+  js.configs.recommended,
+  ...tseslint.configs.recommended,
   {
-    name: 'app/ignores',
-    ignores: [
-      '**/node_modules/**',
-      '**/dist/**',
-      '**/coverage/**',
-      '**/.vercel/**',
-      '**/playwright-report/**',
-      '**/.playwright/**',
-    ],
-  },
-  {
-    name: 'app/base-language-options',
-    files: ['**/*.{js,jsx,ts,tsx}'],
+    files: ['**/*.{ts,tsx}'],
     languageOptions: {
-      ecmaVersion: 2022,
-      sourceType: 'module',
-      globals: {
-        ...globals.browser,
-        ...globals.node,
-      },
+      parser: tseslint.parser,
       parserOptions: {
-        ecmaFeatures: {
-          jsx: true,
-        },
+        tsconfigRootDir: new URL('.', import.meta.url),
+        project: ['./tsconfig.json'],
+      },
+    },
+    plugins: {
+      react: reactPlugin,
+      'react-hooks': reactHooks,
+    },
+    rules: {
+      'react/react-in-jsx-scope': 'off',
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'warn',
+    },
+    settings: {
+      react: {
+        version: 'detect',
       },
     },
   },
-  js.configs.recommended,
-  ...typescriptRecommended({ tsconfigRootDir: __dirname }),
-  reactRecommended,
-  viteRecommended,
-]
+);
