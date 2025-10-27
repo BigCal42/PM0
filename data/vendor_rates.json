@@ -1,0 +1,12 @@
+[
+  {
+    "vendor": "Northwind",
+    "role": "Integration Lead",
+    "rate": 220
+  },
+  {
+    "vendor": "Acme Advisory",
+    "role": "Change Manager",
+    "rate": 210
+  }
+]
