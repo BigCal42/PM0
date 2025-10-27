@@ -27,16 +27,24 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Install semantic-release tooling
+      - name: Ensure semantic-release tooling is available
         run: |
-          npm install --no-save \
-            semantic-release@24.1.0 \
-            @semantic-release/changelog@6.0.3 \
-            @semantic-release/commit-analyzer@13.0.0 \
-            @semantic-release/git@10.0.1 \
-            @semantic-release/github@10.3.3 \
-            @semantic-release/npm@11.0.3 \
-            @semantic-release/release-notes-generator@14.0.1
+          set -euo pipefail
+          packages=(
+            "semantic-release@24.1.0"
+            "@semantic-release/changelog@6.0.3"
+            "@semantic-release/commit-analyzer@13.0.0"
+            "@semantic-release/git@10.0.1"
+            "@semantic-release/github@10.3.3"
+            "@semantic-release/npm@11.0.3"
+            "@semantic-release/release-notes-generator@14.0.1"
+          )
+          for pkg in "${packages[@]}"; do
+            name="${pkg%@*}"
+            if ! node -e "require.resolve('${name}')" >/dev/null 2>&1; then
+              npm install --no-save "$pkg"
+            fi
+          done
 
       - name: Run semantic-release
         env:
