@@ -1,5 +1,5 @@
-import AppShell from '@/layouts/AppShell';
-import OverviewPanel from '@/components/OverviewPanel';
+import AppShell from './layouts/AppShell';
+import OverviewPanel from './components/OverviewPanel';
 
 const App = () => {
   return (

@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react';
 
-import Footer from '@/components/Footer';
-import Header from '@/components/Header';
-import Sidebar from '@/components/Sidebar';
+import Footer from '../components/Footer';
+import Header from '../components/Header';
+import Sidebar from '../components/Sidebar';
 
 type AppShellProps = {
   children?: ReactNode;
