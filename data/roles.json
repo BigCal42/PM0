@@ -1,0 +1,23 @@
+[
+  {
+    "id": "10101010-aaaa-bbbb-cccc-111111111111",
+    "projectId": "99999999-8888-7777-6666-555555555555",
+    "name": "Project Manager",
+    "category": "Leadership",
+    "rate": 195
+  },
+  {
+    "id": "20202020-bbbb-cccc-dddd-222222222222",
+    "projectId": "99999999-8888-7777-6666-555555555555",
+    "name": "Change Manager",
+    "category": "Change",
+    "rate": 180
+  },
+  {
+    "id": "30303030-cccc-dddd-eeee-333333333333",
+    "projectId": "99999999-8888-7777-6666-555555555555",
+    "name": "Integration Lead",
+    "category": "Technical",
+    "rate": 210
+  }
+]

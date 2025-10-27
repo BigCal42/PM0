@@ -23,4 +23,36 @@ export function App(): JSX.Element {
   );
 }
 
-export default App;
+        <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+          <h2 className="text-xl font-semibold text-slate-800">Runtime flags</h2>
+          <dl className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <ConfigItem label="Demo mode" value={isDemoMode ? 'enabled' : 'disabled'} />
+            <ConfigItem label="Sentry DSN" value={sentryDsn ?? null} />
+          </dl>
+        </section>
+
+        <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+          <h2 className="text-xl font-semibold text-slate-800">Supabase connection</h2>
+          {isDemoMode ? (
+            <p className="mt-2 text-sm text-slate-600">
+              Supabase is bypassed because <code>VITE_USE_DEMO_DATA</code> is enabled. Disable demo mode to connect to your project
+              using the values below.
+            </p>
+          ) : (
+            <p className="mt-2 text-sm text-slate-600">
+              Supabase will initialise with the configured URL and anon key. Update these variables in your environment to point to
+              the correct workspace.
+            </p>
+          )}
+          <dl className="mt-4 grid grid-cols-1 gap-4">
+            <ConfigItem label="VITE_SUPABASE_URL" value={env.supabaseUrl} />
+            <ConfigItem
+              label="VITE_SUPABASE_ANON_KEY"
+              value={env.supabaseAnonKey ? `${env.supabaseAnonKey.slice(0, 6)}…${env.supabaseAnonKey.slice(-4)}` : null}
+            />
+          </dl>
+        </section>
+      </div>
+    </main>
+  )
+}

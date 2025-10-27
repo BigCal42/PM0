@@ -1,0 +1,18 @@
+[
+  {
+    "projectId": "99999999-8888-7777-6666-555555555555",
+    "scenarioId": "abcdabcd-0000-1111-2222-abcdefabcdef",
+    "month": "2024-01-01",
+    "demandHours": 520,
+    "supplyHours": 460,
+    "severity": "watch"
+  },
+  {
+    "projectId": "99999999-8888-7777-6666-555555555555",
+    "scenarioId": "abcdabcd-0000-1111-2222-abcdefabcdef",
+    "month": "2024-02-01",
+    "demandHours": 430,
+    "supplyHours": 470,
+    "severity": "on_track"
+  }
+]
