@@ -12,7 +12,7 @@ export default defineConfig({
     baseURL: BASE_URL,
   },
   webServer: {
-    command: `npm run dev -- --host ${HOST} --port ${PORT}`,
+    command: `npm run build && npm run preview -- --host ${HOST} --port ${PORT} --strictPort`,
     url: BASE_URL,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
