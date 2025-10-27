@@ -25,6 +25,14 @@ jobs:
       - name: Install Playwright browsers
         run: npx --yes playwright@1.46.1 install --with-deps
 
+      - name: Typecheck (conditional)
+        if: ${{ hashFiles('src/**/*.{ts,tsx,js,jsx}') != '' }}
+        run: npm run typecheck
+
+      - name: Lint (conditional)
+        if: ${{ hashFiles('eslint.config.*', '.eslintrc.*') != '' }}
+        run: npm run lint
+
       - name: Build
         run: npm run build
 
