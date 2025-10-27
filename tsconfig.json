@@ -8,6 +8,10 @@
     "resolveJsonModule": true,
     "noEmit": true,
     "baseUrl": ".",
+    "types": [
+      "vite/client",
+      "node"
+    ],
     "paths": {
       "@/*": [
         "src/*"
@@ -16,6 +20,6 @@
   },
   "include": [
     "src",
-    "tests"
+    "types"
   ]
 }
