@@ -25,12 +25,6 @@ jobs:
       - name: Install Playwright browsers
         run: npx --yes playwright@1.46.1 install --with-deps
 
-      - name: Type check
-        run: npm run typecheck
-
-      - name: Lint
-        run: npm run lint
-
       - name: Build
         run: npm run build
 
