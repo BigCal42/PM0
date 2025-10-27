@@ -36,7 +36,8 @@ drop policy if exists projects_select on public.projects;
 create policy projects_select on public.projects
 for select
 using (
-  exists (
+  projects.created_by = auth.uid()
+  or exists (
     select 1 from public.project_members pm
     where pm.project_id = projects.id
       and pm.user_id = auth.uid()
@@ -91,8 +92,7 @@ using (public.is_project_member(project_id));
 
 drop policy if exists project_members_mutate on public.project_members;
 create policy project_members_mutate on public.project_members
-for all
-using (
+for update using (
   exists (
     select 1 from public.project_members pm
     where pm.project_id = project_members.project_id
@@ -102,6 +102,38 @@ using (
 )
 with check (
   exists (
+    select 1 from public.project_members pm
+    where pm.project_id = project_members.project_id
+      and pm.user_id = auth.uid()
+      and pm.role in ('owner','admin')
+  )
+);
+
+drop policy if exists project_members_delete on public.project_members;
+create policy project_members_delete on public.project_members
+for delete using (
+  exists (
+    select 1 from public.project_members pm
+    where pm.project_id = project_members.project_id
+      and pm.user_id = auth.uid()
+      and pm.role in ('owner','admin')
+  )
+);
+
+drop policy if exists project_members_insert_initial on public.project_members;
+create policy project_members_insert_initial on public.project_members
+for insert
+with check (
+  exists (
+    select 1 from public.projects p
+    where p.id = project_members.project_id
+      and p.created_by = auth.uid()
+  )
+  and not exists (
+    select 1 from public.project_members pm
+    where pm.project_id = project_members.project_id
+  )
+  or exists (
     select 1 from public.project_members pm
     where pm.project_id = project_members.project_id
       and pm.user_id = auth.uid()
