@@ -38,7 +38,8 @@ for select
 using (
   projects.created_by = auth.uid()
   or exists (
-    select 1 from public.project_members pm
+    select 1
+    from public.project_members pm
     where pm.project_id = projects.id
       and pm.user_id = auth.uid()
   )
@@ -124,17 +125,23 @@ drop policy if exists project_members_insert_initial on public.project_members;
 create policy project_members_insert_initial on public.project_members
 for insert
 with check (
-  exists (
-    select 1 from public.projects p
-    where p.id = project_members.project_id
-      and p.created_by = auth.uid()
-  )
-  and not exists (
-    select 1 from public.project_members pm
-    where pm.project_id = project_members.project_id
+  (
+    project_members.user_id = auth.uid()
+    and exists (
+      select 1
+      from public.projects p
+      where p.id = project_members.project_id
+        and p.created_by = auth.uid()
+    )
+    and not exists (
+      select 1
+      from public.project_members pm
+      where pm.project_id = project_members.project_id
+    )
   )
   or exists (
-    select 1 from public.project_members pm
+    select 1
+    from public.project_members pm
     where pm.project_id = project_members.project_id
       and pm.user_id = auth.uid()
       and pm.role in ('owner','admin')
