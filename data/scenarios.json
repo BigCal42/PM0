@@ -1,0 +1,42 @@
+[
+  {
+    "id": "abcdabcd-0000-1111-2222-abcdefabcdef",
+    "projectId": "99999999-8888-7777-6666-555555555555",
+    "name": "Baseline FY24",
+    "template": "baseline",
+    "assumptions": {
+      "estimated_hours": 5200,
+      "vendor_mix_pct": 35,
+      "duration_months": 12,
+      "blended_rate": 185,
+      "readiness_weight": 82
+    },
+    "metrics": {
+      "total_hours": 5200,
+      "total_cost": 962000,
+      "peak_fte": 2.7,
+      "vendor_spend_pct": 35,
+      "readiness_score": 82
+    }
+  },
+  {
+    "id": "bbbbcccc-dddd-eeee-ffff-000011112222",
+    "projectId": "99999999-8888-7777-6666-555555555555",
+    "name": "Accelerated",
+    "template": "accelerated",
+    "assumptions": {
+      "estimated_hours": 6100,
+      "vendor_mix_pct": 40,
+      "duration_months": 9,
+      "blended_rate": 192,
+      "readiness_weight": 76
+    },
+    "metrics": {
+      "total_hours": 6100,
+      "total_cost": 1171200,
+      "peak_fte": 3.4,
+      "vendor_spend_pct": 40,
+      "readiness_score": 76
+    }
+  }
+]
