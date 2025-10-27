@@ -203,6 +203,8 @@ select exists (
 grant execute on function pm0.is_org_member to authenticated;
 
 grant usage on schema pm0 to authenticated;
+grant select, insert, update, delete on all tables in schema pm0 to authenticated;
+grant usage, select on all sequences in schema pm0 to authenticated;
 
 create or replace function pm0.is_project_member(project_id uuid)
 returns boolean
