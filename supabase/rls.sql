@@ -13,17 +13,32 @@ alter table public.assignments   enable row level security;
 alter table public.scenarios     enable row level security;
 alter table public.scenario_results enable row level security;
 
--- Helper: check if auth user is a member of the given project
 create or replace function public.is_project_member(p_project_id uuid)
 returns boolean
 language sql
 stable
+set search_path = public, pg_temp
 as $$
   select exists (
     select 1
     from public.project_members pm
     where pm.project_id = p_project_id
       and pm.user_id = auth.uid()
+  );
+$$;
+
+-- Helper: detect whether any membership rows exist for a project (ignores RLS)
+create or replace function public.project_has_any_members(p_project_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public, pg_temp
+as $$
+  select exists (
+    select 1
+    from public.project_members pm
+    where pm.project_id = p_project_id
   );
 $$;
 
@@ -38,7 +53,8 @@ for select
 using (
   projects.created_by = auth.uid()
   or exists (
-    select 1 from public.project_members pm
+    select 1
+    from public.project_members pm
     where pm.project_id = projects.id
       and pm.user_id = auth.uid()
   )
@@ -124,17 +140,20 @@ drop policy if exists project_members_insert_initial on public.project_members;
 create policy project_members_insert_initial on public.project_members
 for insert
 with check (
-  exists (
-    select 1 from public.projects p
-    where p.id = project_members.project_id
-      and p.created_by = auth.uid()
-  )
-  and not exists (
-    select 1 from public.project_members pm
-    where pm.project_id = project_members.project_id
+  (
+    project_members.user_id = auth.uid()
+    and project_members.role = 'owner'
+    and exists (
+      select 1
+      from public.projects p
+      where p.id = project_members.project_id
+        and p.created_by = auth.uid()
+    )
+    and not public.project_has_any_members(project_members.project_id)
   )
   or exists (
-    select 1 from public.project_members pm
+    select 1
+    from public.project_members pm
     where pm.project_id = project_members.project_id
       and pm.user_id = auth.uid()
       and pm.role in ('owner','admin')
@@ -144,8 +163,15 @@ with check (
 -- PHASES / ROLES / RESOURCES / REQUIREMENTS / ASSIGNMENTS
 -- Common policy: members of the project can read/write rows within that project
 create or replace function public.row_is_visible_to_member(p_project_id uuid)
-returns boolean language sql stable as $$
-  select public.is_project_member(p_project_id);
+returns boolean language sql stable set search_path = public, pg_temp as $$
+  select
+    public.is_project_member(p_project_id)
+    or exists (
+      select 1
+      from public.projects p
+      where p.id = p_project_id
+        and p.created_by = auth.uid()
+    );
 $$;
 
 -- Generic helpers to cut repetition:
@@ -172,10 +198,10 @@ drop policy if exists scenario_results_select on public.scenario_results;
 create policy scenario_results_select on public.scenario_results
 for select using (
   exists (
-    select 1 from public.scenarios s
-    join public.project_members pm on pm.project_id = s.project_id
+    select 1
+    from public.scenarios s
     where s.id = scenario_results.scenario_id
-      and pm.user_id = auth.uid()
+      and public.row_is_visible_to_member(s.project_id)
   )
 );
 
@@ -214,17 +240,17 @@ drop policy if exists scenario_results_mutate on public.scenario_results;
 create policy scenario_results_mutate on public.scenario_results
 for all using (
   exists (
-    select 1 from public.scenarios s
-    join public.project_members pm on pm.project_id = s.project_id
+    select 1
+    from public.scenarios s
     where s.id = scenario_results.scenario_id
-      and pm.user_id = auth.uid()
+      and public.row_is_visible_to_member(s.project_id)
   )
 )
 with check (
   exists (
-    select 1 from public.scenarios s
-    join public.project_members pm on pm.project_id = s.project_id
+    select 1
+    from public.scenarios s
     where s.id = scenario_results.scenario_id
-      and pm.user_id = auth.uid()
+      and public.row_is_visible_to_member(s.project_id)
   )
 );
