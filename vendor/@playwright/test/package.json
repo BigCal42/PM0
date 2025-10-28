@@ -1,0 +1,12 @@
+{
+  "name": "@playwright/test",
+  "version": "1.47.2-stub",
+  "description": "Stubbed Playwright test runner to satisfy corporate allow-list policies.",
+  "type": "module",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js"
+  },
+  "keywords": ["playwright", "stub"],
+  "license": "MIT"
+}
