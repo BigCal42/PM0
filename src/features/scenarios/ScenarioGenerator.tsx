@@ -1,11 +1,10 @@
 import React, { useMemo, useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Section } from '../../components/Section';
 import { useProjectStore, type Scenario, type ScenarioMultiplier } from '../../store/useProjectStore';
+import { useFeatureFlags } from '../../store/useFeatureFlags';
 import { useResourceDataSource } from '../resources/api';
 import { nanoid } from '../../utils/nanoid';
-
-const scenariosQueryKey = ['scenarios'];
 
 const BASELINE_KPIS = {
   totalHours: 5200,
@@ -44,6 +43,24 @@ const calculateScenarioResults = (multipliers: ScenarioMultiplier) => {
   } satisfies Scenario['results'];
 };
 
+const buildScenarioAssumptions = (results: Scenario['results']) => {
+  const estimatedHours = results.totalHours ?? BASELINE_KPIS.totalHours;
+  const vendorMixPct = results.vendorSpendPct ?? BASELINE_KPIS.vendorSpendPct;
+  const durationMonths = results.durationMonths ?? BASELINE_KPIS.durationMonths;
+  const readinessWeight = results.readinessScore ?? BASELINE_KPIS.readinessScore;
+  const blendedRateBase = BASELINE_KPIS.totalHours ? Math.round(BASELINE_KPIS.totalCost / BASELINE_KPIS.totalHours) : 0;
+  const blendedRate =
+    estimatedHours > 0 ? Math.round(results.totalCost / estimatedHours) : blendedRateBase;
+
+  return {
+    estimatedHours,
+    vendorMixPct,
+    durationMonths,
+    blendedRate,
+    readinessWeight,
+  } satisfies Scenario['assumptions'];
+};
+
 const normalizeScenario = (scenario: Scenario): Scenario => {
   const multipliers: ScenarioMultiplier = {
     ...scenario.multipliers,
@@ -62,38 +79,6 @@ const normalizeScenario = (scenario: Scenario): Scenario => {
   };
 };
 
-type DuplicateFormState = {
-  name: string;
-  effortMultiplier: string;
-  durationMultiplier: string;
-  costMultiplier: string;
-};
-
-export const ScenarioGenerator: React.FC = () => {
-  const queryClient = useQueryClient();
-  const { scenarios, upsertScenario, removeScenario, setScenarios, selectedScenarioId, selectScenario } = useProjectStore(
-    (state) => ({
-      scenarios: state.scenarios,
-      upsertScenario: state.upsertScenario,
-      removeScenario: state.removeScenario,
-      setScenarios: state.setScenarios,
-      selectedScenarioId: state.selectedScenarioId,
-      selectScenario: state.selectScenario,
-    }),
-  );
-  const { fetchScenarios, persistScenario, removeScenario: removeScenarioFromSource } = useResourceDataSource();
-
-  useQuery({
-    queryKey: scenariosQueryKey,
-    queryFn: fetchScenarios,
-    onSuccess: (data) => {
-      const normalized = data.map(normalizeScenario);
-      queryClient.setQueryData<Scenario[]>(scenariosQueryKey, normalized);
-      setScenarios(normalized);
-    },
-  });
-import { useFeatureFlags } from '../../store/useFeatureFlags';
-
 const scenarioDefinitions: ScenarioMultiplier[] = [
   { id: 'baseline', label: 'Baseline', effortMultiplier: 1, durationMultiplier: 1, costMultiplier: 1 },
   { id: 'accelerated', label: 'Accelerated', effortMultiplier: 1.15, durationMultiplier: 0.85, costMultiplier: 1.2 },
@@ -102,15 +87,24 @@ const scenarioDefinitions: ScenarioMultiplier[] = [
   { id: 'high-scope', label: 'High Scope', effortMultiplier: 1.35, durationMultiplier: 1.1, costMultiplier: 1.4 },
 ];
 
+type DuplicateFormState = {
+  name: string;
+  effortMultiplier: string;
+  durationMultiplier: string;
+  costMultiplier: string;
+};
+
 export const ScenarioGenerator: React.FC = () => {
-  const queryClient = useQueryClient();
   const { useDemoData } = useFeatureFlags();
   const modeKey = useDemoData ? 'demo' : 'live';
   const scenariosQueryKey = ['scenarios', modeKey] as const;
-  const { scenarios, upsertScenario, removeScenario } = useProjectStore((state) => ({
+  const queryClient = useQueryClient();
+  const { scenarios, upsertScenario, removeScenario, selectedScenarioId, selectScenario } = useProjectStore((state) => ({
     scenarios: state.scenarios,
     upsertScenario: state.upsertScenario,
     removeScenario: state.removeScenario,
+    selectedScenarioId: state.selectedScenarioId,
+    selectScenario: state.selectScenario,
   }));
   const { persistScenario, removeScenario: removeScenarioFromSource } = useResourceDataSource();
 
@@ -176,8 +170,10 @@ export const ScenarioGenerator: React.FC = () => {
     const name = duplicateForm.name.trim();
     if (!name) return;
 
-    const effortMultiplier = Number.parseFloat(duplicateForm.effortMultiplier) || activeScenario.multipliers.effortMultiplier;
-    const durationMultiplier = Number.parseFloat(duplicateForm.durationMultiplier) || activeScenario.multipliers.durationMultiplier;
+    const effortMultiplier =
+      Number.parseFloat(duplicateForm.effortMultiplier) || activeScenario.multipliers.effortMultiplier;
+    const durationMultiplier =
+      Number.parseFloat(duplicateForm.durationMultiplier) || activeScenario.multipliers.durationMultiplier;
     const costMultiplier = Number.parseFloat(duplicateForm.costMultiplier) || activeScenario.multipliers.costMultiplier;
 
     const multipliers: ScenarioMultiplier = {
@@ -211,6 +207,74 @@ export const ScenarioGenerator: React.FC = () => {
     deleteScenarioMutation.mutate(scenarioId);
   };
 
+  const scenarioCards = useMemo(
+    () =>
+      scenarioDefinitions.map((definition) => {
+        const projectedResults = calculateScenarioResults(definition);
+
+        const handleGenerateScenario = () => {
+          const multipliers: ScenarioMultiplier = {
+            id: nanoid(),
+            label: definition.label,
+            effortMultiplier: definition.effortMultiplier,
+            durationMultiplier: definition.durationMultiplier,
+            costMultiplier: definition.costMultiplier,
+          };
+
+          const results = calculateScenarioResults(multipliers);
+
+          const scenario: Scenario = {
+            id: nanoid(),
+            name: definition.label,
+            multipliers,
+            assumptions: buildScenarioAssumptions(results),
+            results,
+          };
+
+          createScenarioMutation.mutate(scenario);
+        };
+
+        return (
+          <div key={definition.id} className="flex flex-col justify-between rounded-md border border-slate-200 p-4">
+            <div>
+              <h3 className="text-sm font-semibold text-slate-900">{definition.label}</h3>
+              <dl className="mt-3 space-y-1 text-xs text-slate-600">
+                <div className="flex justify-between">
+                  <dt>Effort</dt>
+                  <dd>x{definition.effortMultiplier.toFixed(2)}</dd>
+                </div>
+                <div className="flex justify-between">
+                  <dt>Duration</dt>
+                  <dd>x{definition.durationMultiplier.toFixed(2)}</dd>
+                </div>
+                <div className="flex justify-between">
+                  <dt>Cost</dt>
+                  <dd>x{definition.costMultiplier.toFixed(2)}</dd>
+                </div>
+                <div className="flex justify-between">
+                  <dt>Total Cost</dt>
+                  <dd>{currencyFormatter.format(projectedResults.totalCost)}</dd>
+                </div>
+                <div className="flex justify-between">
+                  <dt>Risk Score</dt>
+                  <dd>{projectedResults.riskScore}</dd>
+                </div>
+              </dl>
+            </div>
+            <button
+              type="button"
+              className="mt-4 rounded-md bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-60"
+              onClick={handleGenerateScenario}
+              disabled={createScenarioMutation.isPending}
+            >
+              Generate Scenario
+            </button>
+          </div>
+        );
+      }),
+    [createScenarioMutation],
+  );
+
   return (
     <Section
       title="Scenario Generator"
@@ -228,6 +292,7 @@ export const ScenarioGenerator: React.FC = () => {
         </div>
       }
     >
+      <div className="grid gap-4 md:grid-cols-3">{scenarioCards}</div>
       <div className="overflow-hidden rounded-md border border-slate-200">
         <table className="min-w-full divide-y divide-slate-200 text-left text-sm" data-testid="scenario-list">
           <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-600">
@@ -332,10 +397,7 @@ export const ScenarioGenerator: React.FC = () => {
       </div>
 
       {isDuplicateOpen && activeScenario && (
-        <form
-          className="mt-6 space-y-3 rounded-md border border-slate-200 p-4"
-          onSubmit={handleDuplicateScenario}
-        >
+        <form className="mt-6 space-y-3 rounded-md border border-slate-200 p-4" onSubmit={handleDuplicateScenario}>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h3 className="text-sm font-semibold text-slate-900">Duplicate Scenario</h3>
             <button
@@ -402,36 +464,6 @@ export const ScenarioGenerator: React.FC = () => {
           </div>
         </form>
       )}
-        );
-      }),
-    [createScenarioMutation.isPending, scenarios],
-  );
-
-  return (
-    <Section title="Scenario Generator" actions={<span className="text-xs text-slate-500">{scenarios.length} saved</span>}>
-      <div className="grid gap-4 md:grid-cols-3">{scenarioCards}</div>
-      <div className="rounded-md border border-slate-200 p-4">
-        <h3 className="text-sm font-semibold text-slate-900">Saved Scenarios</h3>
-        <ul className="mt-2 space-y-2 text-sm" data-testid="scenario-list">
-          {scenarios.map((scenario) => (
-            <li key={scenario.id} className="flex items-start justify-between rounded-md border border-slate-200 p-3">
-              <div>
-                <p className="font-medium text-slate-900">{scenario.name}</p>
-                <p className="text-xs text-slate-500">Total cost: ${scenario.results.totalCost.toLocaleString()}</p>
-                <p className="text-xs text-slate-500">Risk score: {scenario.results.riskScore}</p>
-              </div>
-              <button
-                type="button"
-                className="rounded-md px-2 py-1 text-xs font-semibold text-red-600 hover:bg-red-50"
-                onClick={() => handleDeleteScenario(scenario.id)}
-              >
-                Delete
-              </button>
-            </li>
-          ))}
-          {!scenarios.length && <p className="text-xs text-slate-500">Generate scenarios to compare assumptions.</p>}
-        </ul>
-      </div>
     </Section>
   );
 };
