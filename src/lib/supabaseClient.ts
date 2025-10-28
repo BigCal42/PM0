@@ -3,12 +3,61 @@ import { env } from './env';
 
 type SupabaseClientType = ReturnType<typeof createClient>;
 
-let cachedClient: SupabaseClientType | null = null;
+const createDemoSupabaseClient = (): SupabaseClientType => {
+  const unavailable = (operation: string) =>
+    new Error(`${operation} is not available when VITE_USE_DEMO_DATA=true.`);
 
-export const getSupabaseClient = (): SupabaseClientType | null => {
-  // Respect demo mode - return null to prevent any Supabase calls
+  const authStub = {
+    async getSession() {
+      return { data: { session: null }, error: null };
+    },
+    onAuthStateChange() {
+      return {
+        data: {
+          subscription: {
+            unsubscribe: () => {},
+          },
+        },
+        error: null,
+      };
+    },
+    async signInWithPassword() {
+      return {
+        data: { user: null, session: null },
+        error: unavailable('supabase.auth.signInWithPassword'),
+      };
+    },
+    async signUp() {
+      return {
+        data: { user: null, session: null },
+        error: unavailable('supabase.auth.signUp'),
+      };
+    },
+    async signOut() {
+      return { error: null };
+    },
+  };
+
+  return new Proxy({ auth: authStub } as Record<string, unknown>, {
+    get(target, prop) {
+      if (prop === 'auth') {
+        return target.auth;
+      }
+
+      return () => {
+        throw unavailable(`supabase.${String(prop)}`);
+      };
+    },
+  }) as SupabaseClientType;
+};
+
+let cachedClient: SupabaseClientType | null = null;
+const demoClient = createDemoSupabaseClient();
+
+export const getSupabaseClient = (): SupabaseClientType => {
+  // Respect demo mode by returning a guarded stub client
   if (env.useDemoData) {
-    return null;
+    return demoClient;
   }
 
   // Return cached client if already initialized
