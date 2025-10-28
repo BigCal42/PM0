@@ -10,9 +10,13 @@ const LEGEND_ITEMS = [
 
 export function HeatmapLegend() {
   return (
-    <div className="flex flex-wrap gap-2 text-xs text-slate-600">
+    <div className="flex flex-wrap gap-2 text-xs text-slate-600" data-testid="severity-legend">
       {LEGEND_ITEMS.map((item) => (
-        <span key={item.key} className={`flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 shadow-sm`}>
+        <span
+          key={item.key}
+          className={`flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 shadow-sm`}
+          data-testid={`legend-${item.key}`}
+        >
           <span className={`${severityToClass[item.key]} inline-flex h-3 w-3 items-center justify-center rounded-full border border-slate-300`}></span>
           {item.label}
         </span>
