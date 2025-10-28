@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Section } from '../../components/Section';
 import { useProjectStore, type Scenario, type ScenarioMultiplier } from '../../store/useProjectStore';
 import { useResourceDataSource } from '../resources/api';
+import { useFeatureFlags } from '../../store/useFeatureFlags';
 
 const scenarioDefinitions: ScenarioMultiplier[] = [
   { id: 'baseline', label: 'Baseline', effortMultiplier: 1, durationMultiplier: 1, costMultiplier: 1 },
@@ -12,10 +13,11 @@ const scenarioDefinitions: ScenarioMultiplier[] = [
   { id: 'high-scope', label: 'High Scope', effortMultiplier: 1.35, durationMultiplier: 1.1, costMultiplier: 1.4 },
 ];
 
-const scenariosQueryKey = ['scenarios'];
-
 export const ScenarioGenerator: React.FC = () => {
   const queryClient = useQueryClient();
+  const { useDemoData } = useFeatureFlags();
+  const modeKey = useDemoData ? 'demo' : 'live';
+  const scenariosQueryKey = ['scenarios', modeKey] as const;
   const { scenarios, upsertScenario, removeScenario } = useProjectStore((state) => ({
     scenarios: state.scenarios,
     upsertScenario: state.upsertScenario,
@@ -107,7 +109,7 @@ export const ScenarioGenerator: React.FC = () => {
       <div className="grid gap-4 md:grid-cols-3">{scenarioCards}</div>
       <div className="rounded-md border border-slate-200 p-4">
         <h3 className="text-sm font-semibold text-slate-900">Saved Scenarios</h3>
-        <ul className="mt-2 space-y-2 text-sm">
+        <ul className="mt-2 space-y-2 text-sm" data-testid="scenario-list">
           {scenarios.map((scenario) => (
             <li key={scenario.id} className="flex items-start justify-between rounded-md border border-slate-200 p-3">
               <div>

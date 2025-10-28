@@ -27,7 +27,7 @@ const checklistItems = [
 export const ReadinessChecklist: React.FC = () => {
   return (
     <Section title="Readiness Checklist" actions={<span className="text-xs text-slate-500">Operational milestones</span>}>
-      <ul className="space-y-3 text-sm">
+      <ul className="space-y-3 text-sm" data-testid="readiness-list">
         {checklistItems.map((item) => (
           <li key={item.id} className="flex items-start gap-3 rounded-md border border-slate-200 p-3">
             <span className="mt-1 inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 text-xs font-semibold text-emerald-700">
