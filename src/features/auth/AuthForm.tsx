@@ -3,6 +3,7 @@ import { useMutation } from '@tanstack/react-query';
 import { z } from 'zod';
 import { Supabase } from './SupabaseAuthProvider';
 import { ErrorMessage } from '../../components/ErrorMessage';
+import { useFeatureFlags } from '../../store/useFeatureFlags';
 
 const authSchema = z.object({
   email: z.string().email('Enter a valid email address'),
@@ -14,6 +15,7 @@ type AuthMode = 'signIn' | 'signUp';
 export const AuthForm: React.FC = () => {
   const [mode, setMode] = useState<AuthMode>('signIn');
   const [formError, setFormError] = useState<string | null>(null);
+  const { useDemoData, setUseDemoData } = useFeatureFlags();
 
   const mutation = useMutation({
     mutationFn: async (form: { email: string; password: string }) => {
@@ -36,6 +38,14 @@ export const AuthForm: React.FC = () => {
     onSuccess: () => setFormError(null),
   });
 
+  const handleUseDemoMode = () => {
+    setUseDemoData(true);
+  };
+
+  const handleUseLiveData = () => {
+    setUseDemoData(false);
+  };
+
   const handleSubmit: React.FormEventHandler<HTMLFormElement> = (event) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
@@ -51,6 +61,24 @@ export const AuthForm: React.FC = () => {
         <p className="text-sm text-slate-600">
           Use your enterprise email and password. New users can create an account via the sign-up tab.
         </p>
+        <div className="flex flex-wrap items-center justify-center gap-3 pt-2 text-sm font-medium">
+          <button
+            type="button"
+            onClick={handleUseDemoMode}
+            className="rounded-md border border-slate-200 px-3 py-1 text-slate-700 transition hover:border-slate-300 hover:bg-slate-100"
+          >
+            Use demo mode
+          </button>
+          {useDemoData && (
+            <button
+              type="button"
+              onClick={handleUseLiveData}
+              className="rounded-md border border-slate-200 px-3 py-1 text-slate-700 transition hover:border-slate-300 hover:bg-slate-100"
+            >
+              Use live data
+            </button>
+          )}
+        </div>
       </div>
       <div className="flex justify-center gap-2 text-sm">
         <button
