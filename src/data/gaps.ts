@@ -1,4 +1,6 @@
-import { supabase } from '@/lib/supabaseClient';
+import { getSupabaseClient } from '@/lib/supabaseClient';
+
+const supabase = getSupabaseClient();
 
 export type PhaseRow = { phase_id: string; phase_name: string; sort_order: number };
 export type GapRow = {
