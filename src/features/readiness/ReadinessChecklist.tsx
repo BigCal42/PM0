@@ -62,6 +62,17 @@ export const ReadinessChecklist: React.FC = () => {
               ))}
             </ul>
           </div>
+      <ul className="space-y-3 text-sm" data-testid="readiness-list">
+        {checklistItems.map((item) => (
+          <li key={item.id} className="flex items-start gap-3 rounded-md border border-slate-200 p-3">
+            <span className="mt-1 inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 text-xs font-semibold text-emerald-700">
+              ✓
+            </span>
+            <div>
+              <p className="font-medium text-slate-900">{item.title}</p>
+              <p className="text-xs text-slate-500">{item.description}</p>
+            </div>
+          </li>
         ))}
       </div>
     </Section>

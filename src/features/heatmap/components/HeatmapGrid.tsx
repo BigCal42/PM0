@@ -55,7 +55,7 @@ function HeatmapGridComponent({ matrix, months }: HeatmapGridProps) {
   );
 
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-200">
+    <div className="overflow-hidden rounded-xl border border-slate-200" data-testid="heatmap-grid">
       <div
         className="grid items-center gap-px border-b border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold uppercase text-slate-500"
         style={{ gridTemplateColumns }}
@@ -104,7 +104,10 @@ const HeatmapCellView = memo(({ cell }: { cell: HeatmapCell }) => {
   const severityClass = severityToClass[cell.severity];
 
   return (
-    <div className={`${severityClass} rounded-lg px-3 py-2 text-center transition-colors`}>
+    <div
+      className={`${severityClass} rounded-lg px-3 py-2 text-center transition-colors`}
+      data-testid={`heatmap-cell-${cell.severity}`}
+    >
       <p className="text-sm font-semibold">{formatGap(cell.gap)}</p>
       <p className="text-[11px] opacity-80">{formatShortNumber(cell.supply)} • {formatShortNumber(cell.demand)}</p>
     </div>
