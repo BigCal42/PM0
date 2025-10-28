@@ -1,10 +1,30 @@
 import { z } from 'zod';
 
+const readEnv = (key: string): string | undefined => {
+  const metaEnv = (typeof import.meta !== 'undefined' && import.meta.env)
+    ? (import.meta.env as Record<string, string | undefined>)
+    : undefined;
+
+  const metaValue = metaEnv?.[key];
+  if (typeof metaValue === 'string') {
+    return metaValue;
+  }
+
+  if (typeof process !== 'undefined' && typeof process.env === 'object') {
+    const processValue = process.env[key];
+    if (typeof processValue === 'string') {
+      return processValue;
+    }
+  }
+
+  return undefined;
+};
+
 const rawEnv = {
-  VITE_SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL,
-  VITE_SUPABASE_ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY,
-  VITE_USE_DEMO_DATA: import.meta.env.VITE_USE_DEMO_DATA,
-  VITE_SENTRY_DSN: import.meta.env.VITE_SENTRY_DSN,
+  VITE_SUPABASE_URL: readEnv('VITE_SUPABASE_URL') ?? readEnv('NEXT_PUBLIC_SUPABASE_URL'),
+  VITE_SUPABASE_ANON_KEY: readEnv('VITE_SUPABASE_ANON_KEY') ?? readEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY'),
+  VITE_USE_DEMO_DATA: readEnv('VITE_USE_DEMO_DATA'),
+  VITE_SENTRY_DSN: readEnv('VITE_SENTRY_DSN'),
 };
 
 const optionalString = z
