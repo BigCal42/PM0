@@ -1,7 +1,9 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 export type FeatureFlagContextValue = {
   useDemoData: boolean;
+  setUseDemoData: (value: boolean) => void;
+  toggleDemoData: () => void;
   setUseDemoData: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
@@ -40,6 +42,35 @@ const getStoredPreference = (): boolean | null => {
 };
 
 export const FeatureFlagProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
+  const getInitialValue = () => {
+    const fallback = normalizeBoolean(import.meta.env.VITE_USE_DEMO_DATA ?? false);
+
+    if (typeof window === 'undefined') {
+      return fallback;
+    }
+
+    const persisted = window.localStorage.getItem('pm0-use-demo-data');
+    return persisted === null ? fallback : normalizeBoolean(persisted);
+  };
+
+  const [useDemoData, setUseDemoDataState] = useState<boolean>(getInitialValue);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    window.localStorage.setItem('pm0-use-demo-data', String(useDemoData));
+  }, [useDemoData]);
+
+  const setUseDemoData = useCallback((value: boolean) => {
+    setUseDemoDataState(value);
+  }, []);
+
+  const toggleDemoData = useCallback(() => {
+    setUseDemoDataState((previous) => !previous);
+  }, []);
+
+  const value = useMemo<FeatureFlagContextValue>(
+    () => ({ useDemoData, setUseDemoData, toggleDemoData }),
+    [setUseDemoData, toggleDemoData, useDemoData],
   const [useDemoData, setUseDemoData] = useState<boolean>(() => {
     const storedPreference = getStoredPreference();
     if (storedPreference !== null) {
