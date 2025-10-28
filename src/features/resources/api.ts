@@ -32,8 +32,12 @@ const scenarioSchema = z.object({
   assumptions: z.record(z.any()),
   results: z.object({
     totalCost: z.number(),
-    totalFte: z.number(),
-    riskScore: z.number(),
+    totalFte: z.number().optional(),
+    riskScore: z.number().optional(),
+    totalHours: z.number().optional(),
+    vendorSpendPct: z.number().optional(),
+    readinessScore: z.number().optional(),
+    durationMonths: z.number().optional(),
   }),
 });
 

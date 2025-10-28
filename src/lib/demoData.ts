@@ -23,16 +23,30 @@ export const demoHeatmap: HeatmapCell[] = months.flatMap((month) => [
 export const demoScenarios: Scenario[] = [
   {
     id: 'baseline',
-    name: 'Baseline',
+    name: 'Baseline FY24',
     multipliers: {
       id: 'baseline',
-      label: 'Baseline',
+      label: 'Baseline FY24',
       effortMultiplier: 1,
       durationMultiplier: 1,
       costMultiplier: 1,
     },
-    assumptions: { recruitmentLeadTimeWeeks: 8, knowledgeTransfer: 'Standard' },
-    results: { totalCost: 1250000, totalFte: 18.4, riskScore: 0.42 },
+    assumptions: {
+      estimatedHours: 5200,
+      vendorMixPct: 35,
+      durationMonths: 12,
+      blendedRate: 185,
+      readinessWeight: 82,
+    },
+    results: {
+      totalCost: 962000,
+      totalFte: 2.7,
+      riskScore: 0.18,
+      totalHours: 5200,
+      vendorSpendPct: 35,
+      readinessScore: 82,
+      durationMonths: 12,
+    },
   },
   {
     id: 'accelerated',
@@ -44,7 +58,21 @@ export const demoScenarios: Scenario[] = [
       durationMultiplier: 0.85,
       costMultiplier: 1.2,
     },
-    assumptions: { recruitmentLeadTimeWeeks: 6, knowledgeTransfer: 'Compressed' },
-    results: { totalCost: 1475000, totalFte: 19.6, riskScore: 0.55 },
+    assumptions: {
+      estimatedHours: 6100,
+      vendorMixPct: 40,
+      durationMonths: 9,
+      blendedRate: 192,
+      readinessWeight: 76,
+    },
+    results: {
+      totalCost: 1171200,
+      totalFte: 3.4,
+      riskScore: 0.24,
+      totalHours: 6100,
+      vendorSpendPct: 40,
+      readinessScore: 76,
+      durationMonths: 9,
+    },
   },
 ];
