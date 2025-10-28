@@ -7,7 +7,13 @@ import { useFeatureFlags } from '../../store/useFeatureFlags';
 
 export const AuthGate: React.FC<React.PropsWithChildren> = ({ children }) => {
   const { session, loading } = useSupabaseAuth();
-  const { useDemoData } = useFeatureFlags();
+  const { useDemoData, setUseDemoData } = useFeatureFlags();
+
+  useEffect(() => {
+    if (session && useDemoData) {
+      setUseDemoData(false);
+    }
+  }, [session, useDemoData, setUseDemoData]);
 
   if (useDemoData) {
     return <>{children}</>;

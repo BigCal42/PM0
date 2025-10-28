@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "npm run typegen && vite build",
+    "typegen": "bash ./scripts/typegen.sh",
     "preview": "vite preview",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
