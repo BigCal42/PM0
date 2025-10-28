@@ -43,6 +43,24 @@ const calculateScenarioResults = (multipliers: ScenarioMultiplier) => {
   } satisfies Scenario['results'];
 };
 
+const buildScenarioAssumptions = (results: Scenario['results']) => {
+  const estimatedHours = results.totalHours ?? BASELINE_KPIS.totalHours;
+  const vendorMixPct = results.vendorSpendPct ?? BASELINE_KPIS.vendorSpendPct;
+  const durationMonths = results.durationMonths ?? BASELINE_KPIS.durationMonths;
+  const readinessWeight = results.readinessScore ?? BASELINE_KPIS.readinessScore;
+  const blendedRateBase = BASELINE_KPIS.totalHours ? Math.round(BASELINE_KPIS.totalCost / BASELINE_KPIS.totalHours) : 0;
+  const blendedRate =
+    estimatedHours > 0 ? Math.round(results.totalCost / estimatedHours) : blendedRateBase;
+
+  return {
+    estimatedHours,
+    vendorMixPct,
+    durationMonths,
+    blendedRate,
+    readinessWeight,
+  } satisfies Scenario['assumptions'];
+};
+
 const normalizeScenario = (scenario: Scenario): Scenario => {
   const multipliers: ScenarioMultiplier = {
     ...scenario.multipliers,
@@ -203,11 +221,14 @@ export const ScenarioGenerator: React.FC = () => {
             costMultiplier: definition.costMultiplier,
           };
 
+          const results = calculateScenarioResults(multipliers);
+
           const scenario: Scenario = {
             id: nanoid(),
             name: definition.label,
             multipliers,
-            results: calculateScenarioResults(multipliers),
+            assumptions: buildScenarioAssumptions(results),
+            results,
           };
 
           createScenarioMutation.mutate(scenario);
