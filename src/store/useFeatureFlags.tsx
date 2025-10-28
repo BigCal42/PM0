@@ -2,9 +2,8 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 
 export type FeatureFlagContextValue = {
   useDemoData: boolean;
-  setUseDemoData: (value: boolean) => void;
-  toggleDemoData: () => void;
   setUseDemoData: React.Dispatch<React.SetStateAction<boolean>>;
+  toggleDemoData: () => void;
 };
 
 const FeatureFlagContext = createContext<FeatureFlagContextValue | undefined>(undefined);
@@ -42,35 +41,6 @@ const getStoredPreference = (): boolean | null => {
 };
 
 export const FeatureFlagProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
-  const getInitialValue = () => {
-    const fallback = normalizeBoolean(import.meta.env.VITE_USE_DEMO_DATA ?? false);
-
-    if (typeof window === 'undefined') {
-      return fallback;
-    }
-
-    const persisted = window.localStorage.getItem('pm0-use-demo-data');
-    return persisted === null ? fallback : normalizeBoolean(persisted);
-  };
-
-  const [useDemoData, setUseDemoDataState] = useState<boolean>(getInitialValue);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    window.localStorage.setItem('pm0-use-demo-data', String(useDemoData));
-  }, [useDemoData]);
-
-  const setUseDemoData = useCallback((value: boolean) => {
-    setUseDemoDataState(value);
-  }, []);
-
-  const toggleDemoData = useCallback(() => {
-    setUseDemoDataState((previous) => !previous);
-  }, []);
-
-  const value = useMemo<FeatureFlagContextValue>(
-    () => ({ useDemoData, setUseDemoData, toggleDemoData }),
-    [setUseDemoData, toggleDemoData, useDemoData],
   const [useDemoData, setUseDemoData] = useState<boolean>(() => {
     const storedPreference = getStoredPreference();
     if (storedPreference !== null) {
@@ -92,9 +62,13 @@ export const FeatureFlagProvider: React.FC<React.PropsWithChildren> = ({ childre
     }
   }, [useDemoData]);
 
+  const toggleDemoData = useCallback(() => {
+    setUseDemoData((previous) => !previous);
+  }, [setUseDemoData]);
+
   const value = useMemo<FeatureFlagContextValue>(
-    () => ({ useDemoData, setUseDemoData }),
-    [useDemoData, setUseDemoData],
+    () => ({ useDemoData, setUseDemoData, toggleDemoData }),
+    [useDemoData, setUseDemoData, toggleDemoData],
   );
 
   return <FeatureFlagContext.Provider value={value}>{children}</FeatureFlagContext.Provider>;
