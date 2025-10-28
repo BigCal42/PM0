@@ -1,24 +1,24 @@
-import { z } from 'zod'
+import { z } from 'zod';
 
 const rawEnv = {
   VITE_SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL,
   VITE_SUPABASE_ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY,
   VITE_USE_DEMO_DATA: import.meta.env.VITE_USE_DEMO_DATA,
-  VITE_SENTRY_DSN: import.meta.env.VITE_SENTRY_DSN
-}
+  VITE_SENTRY_DSN: import.meta.env.VITE_SENTRY_DSN,
+};
 
 const optionalString = z
   .string()
   .optional()
   .transform((val) => {
-    const trimmed = val?.trim()
-    return trimmed && trimmed.length > 0 ? trimmed : null
-  })
+    const trimmed = val?.trim();
+    return trimmed && trimmed.length > 0 ? trimmed : null;
+  });
 
 const optionalUrl = optionalString.refine(
   (val) => val === null || /^https?:\/\//.test(val),
   'Value must be a valid URL'
-)
+);
 
 const EnvSchema = z
   .object({
@@ -27,47 +27,60 @@ const EnvSchema = z
     VITE_USE_DEMO_DATA: z
       .string()
       .optional()
-      .transform((val) => (val ?? 'false')),
-    VITE_SENTRY_DSN: optionalUrl
+      .transform((val) => val ?? 'false'),
+    VITE_SENTRY_DSN: optionalUrl,
   })
   .superRefine((env, ctx) => {
-    const useDemo = env.VITE_USE_DEMO_DATA.toLowerCase() === 'true'
+    const useDemo = env.VITE_USE_DEMO_DATA.toLowerCase() === 'true';
     if (!useDemo) {
       if (!env.VITE_SUPABASE_URL) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           path: ['VITE_SUPABASE_URL'],
-          message: 'VITE_SUPABASE_URL is required when VITE_USE_DEMO_DATA is false'
-        })
+          message: 'VITE_SUPABASE_URL is required when VITE_USE_DEMO_DATA is false',
+        });
       }
       if (!env.VITE_SUPABASE_ANON_KEY) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           path: ['VITE_SUPABASE_ANON_KEY'],
-          message: 'VITE_SUPABASE_ANON_KEY is required when VITE_USE_DEMO_DATA is false'
-        })
+          message: 'VITE_SUPABASE_ANON_KEY is required when VITE_USE_DEMO_DATA is false',
+        });
       }
     }
-  })
+  });
 
-type ParsedEnv = z.infer<typeof EnvSchema>
+// Validate but don't throw - return validation result
+const validationResult = EnvSchema.safeParse(rawEnv);
 
-function parseEnv(): ParsedEnv {
-  const result = EnvSchema.safeParse(rawEnv)
-  if (!result.success) {
-    console.error('Invalid runtime environment configuration:', result.error.flatten().fieldErrors)
-    throw new Error('Missing or invalid Vite environment variables. Check your .env file or deployment settings.')
-  }
-  return result.data
+// Only throw in development mode
+if (!validationResult.success && import.meta.env.DEV) {
+  console.error('❌ Invalid environment configuration:', validationResult.error.flatten().fieldErrors);
+  throw new Error(
+    'Environment validation failed. Check your .env file.\n' +
+      'Required for production: VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY\n' +
+      'Or set VITE_USE_DEMO_DATA=true for demo mode'
+  );
 }
 
-const parsed = parseEnv()
+// Export safe values with validation status
+export const env = validationResult.success
+  ? {
+      supabaseUrl: validationResult.data.VITE_SUPABASE_URL,
+      supabaseAnonKey: validationResult.data.VITE_SUPABASE_ANON_KEY,
+      useDemoData: validationResult.data.VITE_USE_DEMO_DATA.toLowerCase() === 'true',
+      sentryDsn: validationResult.data.VITE_SENTRY_DSN,
+      isValid: true as const,
+    }
+  : {
+      supabaseUrl: null,
+      supabaseAnonKey: null,
+      useDemoData: true, // Fallback to safe demo mode
+      sentryDsn: null,
+      isValid: false as const,
+    };
 
-const useDemoData = parsed.VITE_USE_DEMO_DATA.toLowerCase() === 'true'
-
-export const env = {
-  supabaseUrl: parsed.VITE_SUPABASE_URL,
-  supabaseAnonKey: parsed.VITE_SUPABASE_ANON_KEY,
-  useDemoData,
-  sentryDsn: parsed.VITE_SENTRY_DSN
-} as const
+// Log warning in production if config is invalid
+if (!env.isValid && import.meta.env.PROD) {
+  console.warn('⚠️ Invalid configuration detected. Running in fallback demo mode.');
+}
