@@ -1,24 +1,35 @@
 import { createClient } from '@supabase/supabase-js';
+import { env } from './env';
 
 type SupabaseClientType = ReturnType<typeof createClient>;
 
 let cachedClient: SupabaseClientType | null = null;
 
-export const getSupabaseClient = (): SupabaseClientType => {
+export const getSupabaseClient = (): SupabaseClientType | null => {
+  // Respect demo mode - return null to prevent any Supabase calls
+  if (env.useDemoData) {
+    return null;
+  }
+
+  // Return cached client if already initialized
   if (cachedClient) {
     return cachedClient;
   }
 
-  const url = import.meta.env.VITE_SUPABASE_URL;
-  const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+  // Get credentials from validated env
+  const url = env.supabaseUrl;
+  const anonKey = env.supabaseAnonKey;
 
+  // Fail fast with clear error if credentials missing
   if (!url || !anonKey) {
-    console.warn(
-      'Supabase URL or ANON key missing. Authenticated features will be disabled until environment variables are set.',
+    throw new Error(
+      'Supabase credentials missing. Either set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY, ' +
+        'or set VITE_USE_DEMO_DATA=true to use demo mode.'
     );
   }
 
-  cachedClient = createClient(url ?? '', anonKey ?? '', {
+  // Create and cache the client
+  cachedClient = createClient(url, anonKey, {
     auth: {
       persistSession: true,
       autoRefreshToken: true,
