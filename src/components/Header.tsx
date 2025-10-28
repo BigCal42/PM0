@@ -1,10 +1,8 @@
 import { useProjectStore } from '@/store/useProjectStore';
-
-const Header = () => {
-  const { projectName } = useProjectStore((state) => ({ projectName: state.projectName }));
 import { useFeatureFlags } from '@/store/useFeatureFlags';
 
 const Header = () => {
+  const { projectName } = useProjectStore((state) => ({ projectName: state.projectName }));
   const { useDemoData, setUseDemoData, toggleDemoData } = useFeatureFlags();
 
   const handleToggle = () => {
