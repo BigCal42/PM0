@@ -1,12 +1,61 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Section } from '../../components/Section';
 import { ErrorMessage } from '../../components/ErrorMessage';
-import { useProjectStore, type Resource, type Role } from '../../store/useProjectStore';
+import {
+  useProjectStore,
+  type HeatmapCell,
+  type Resource,
+  type Role,
+  type Scenario,
+} from '../../store/useProjectStore';
 import { useResourceDataSource } from './api';
 import { nanoid } from '../../utils/nanoid';
 import { useFeatureFlags } from '../../store/useFeatureFlags';
+import { demoHeatmap, demoResources, demoRoles, demoScenarios } from '../../lib/demoData';
 
+const rolesQueryKey = ['roles'];
+const resourcesQueryKey = ['resources'];
+
+type ProjectTemplate = {
+  label: string;
+  roles: Role[];
+  resources: Resource[];
+  heatmap: HeatmapCell[];
+  scenarios: Scenario[];
+};
+
+const projectTemplates: Record<string, ProjectTemplate> = {
+  workday: {
+    label: 'Workday Transformation Accelerator',
+    roles: demoRoles,
+    resources: demoResources,
+    heatmap: demoHeatmap,
+    scenarios: demoScenarios,
+  },
+  blank: {
+    label: 'Blank Project',
+    roles: [],
+    resources: [],
+    heatmap: [],
+    scenarios: [],
+  },
+};
+
+export const ResourceManager: React.FC = () => {
+  const queryClient = useQueryClient();
+  const { useDemoData } = useFeatureFlags();
+  const {
+    setRoles,
+    setResources,
+    setHeatmap,
+    setScenarios,
+    setProjectMetadata,
+    roles,
+    resources,
+    projectName,
+    projectTemplateId,
+  } = useProjectStore((state) => ({
 export const ResourceManager: React.FC = () => {
   const queryClient = useQueryClient();
   const { useDemoData } = useFeatureFlags();
@@ -18,10 +67,18 @@ export const ResourceManager: React.FC = () => {
     resources: state.resources,
     setRoles: state.setRoles,
     setResources: state.setResources,
+    setHeatmap: state.setHeatmap,
+    setScenarios: state.setScenarios,
+    setProjectMetadata: state.setProjectMetadata,
+    projectName: state.projectName,
+    projectTemplateId: state.projectTemplateId,
   }));
   const { fetchRoles, fetchResources, persistRole, persistResource, removeRole, removeResource } =
     useResourceDataSource();
   const [error, setError] = useState<string | null>(null);
+  const [isProjectFormOpen, setProjectFormOpen] = useState(false);
+  const [isRoleFormVisible, setRoleFormVisible] = useState(false);
+  const roleNameInputRef = useRef<HTMLInputElement | null>(null);
 
   const rolesQuery = useQuery({
     queryKey: rolesQueryKey,
@@ -51,7 +108,7 @@ export const ResourceManager: React.FC = () => {
       setError(mutationError instanceof Error ? mutationError.message : 'Failed to save role');
     },
     onSuccess: (role) => {
-      queryClient.setQueryData<Role[]>(rolesQueryKey, (current = []) => {
+      const nextRoles = queryClient.setQueryData<Role[]>(rolesQueryKey, (current = []) => {
         const existingIndex = current.findIndex((item) => item.id === role.id);
         if (existingIndex >= 0) {
           const next = [...current];
@@ -60,6 +117,9 @@ export const ResourceManager: React.FC = () => {
         }
         return [...current, role];
       });
+      if (nextRoles) {
+        setRoles(nextRoles);
+      }
       setError(null);
     },
   });
@@ -70,7 +130,12 @@ export const ResourceManager: React.FC = () => {
       setError(mutationError instanceof Error ? mutationError.message : 'Failed to delete role');
     },
     onSuccess: (_, id) => {
-      queryClient.setQueryData<Role[]>(rolesQueryKey, (current = []) => current.filter((role) => role.id !== id));
+      const nextRoles = queryClient.setQueryData<Role[]>(rolesQueryKey, (current = []) =>
+        current.filter((role) => role.id !== id),
+      );
+      if (nextRoles) {
+        setRoles(nextRoles);
+      }
       setError(null);
     },
   });
@@ -81,7 +146,7 @@ export const ResourceManager: React.FC = () => {
       setError(mutationError instanceof Error ? mutationError.message : 'Failed to save resource');
     },
     onSuccess: (resource) => {
-      queryClient.setQueryData<Resource[]>(resourcesQueryKey, (current = []) => {
+      const nextResources = queryClient.setQueryData<Resource[]>(resourcesQueryKey, (current = []) => {
         const existingIndex = current.findIndex((item) => item.id === resource.id);
         if (existingIndex >= 0) {
           const next = [...current];
@@ -90,6 +155,9 @@ export const ResourceManager: React.FC = () => {
         }
         return [...current, resource];
       });
+      if (nextResources) {
+        setResources(nextResources);
+      }
       setError(null);
     },
   });
@@ -100,9 +168,12 @@ export const ResourceManager: React.FC = () => {
       setError(mutationError instanceof Error ? mutationError.message : 'Failed to delete resource');
     },
     onSuccess: (_, id) => {
-      queryClient.setQueryData<Resource[]>(resourcesQueryKey, (current = []) =>
+      const nextResources = queryClient.setQueryData<Resource[]>(resourcesQueryKey, (current = []) =>
         current.filter((resource) => resource.id !== id),
       );
+      if (nextResources) {
+        setResources(nextResources);
+      }
       setError(null);
     },
   });
@@ -121,10 +192,16 @@ export const ResourceManager: React.FC = () => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     const name = String(formData.get('name') ?? '').trim();
-    const description = String(formData.get('description') ?? '').trim();
-    const monthlyCapacity = Number(formData.get('monthlyCapacity') ?? '0');
+    const category = String(formData.get('category') ?? '').trim();
+    const monthlyCapacityRaw = Number(formData.get('monthlyCapacity') ?? '0');
+    const monthlyCapacity = Number.isFinite(monthlyCapacityRaw) && monthlyCapacityRaw > 0 ? monthlyCapacityRaw : 160;
     if (!name) return;
-    createRoleMutation.mutate({ id: useDemoData ? nanoid() : undefined, name, description, monthlyCapacity });
+    createRoleMutation.mutate({
+      id: useDemoData ? nanoid() : undefined,
+      name,
+      description: category,
+      monthlyCapacity,
+    });
     event.currentTarget.reset();
   };
 
@@ -139,6 +216,35 @@ export const ResourceManager: React.FC = () => {
     event.currentTarget.reset();
   };
 
+  const handleCreateProject: React.FormEventHandler<HTMLFormElement> = (event) => {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    const name = String(formData.get('projectName') ?? '').trim();
+    const templateId = String(formData.get('template') ?? '').trim();
+    if (!name || !templateId) return;
+    const template = projectTemplates[templateId];
+    if (!template) return;
+
+    setProjectMetadata(name, templateId);
+    setRoles(template.roles);
+    setResources(template.resources);
+    setHeatmap(template.heatmap);
+    setScenarios(template.scenarios);
+    queryClient.setQueryData<Role[]>(rolesQueryKey, template.roles);
+    queryClient.setQueryData<Resource[]>(resourcesQueryKey, template.resources);
+    setProjectFormOpen(false);
+    event.currentTarget.reset();
+  };
+
+  const handleRevealRoleForm = () => {
+    setRoleFormVisible(true);
+    requestAnimationFrame(() => {
+      roleNameInputRef.current?.focus();
+    });
+  };
+
+  const templateDescription = projectTemplateId ? projectTemplates[projectTemplateId]?.label ?? 'Custom' : null;
+
   return (
     <Section
       title="Roles & Resources"
@@ -149,60 +255,178 @@ export const ResourceManager: React.FC = () => {
       }
     >
       <ErrorMessage error={error} />
-      <div className="grid gap-6 md:grid-cols-2">
-        <form onSubmit={handleCreateRole} className="space-y-3 rounded-md border border-slate-200 p-4">
-          <h3 className="text-sm font-semibold text-slate-900">Add Role</h3>
-          <input
-            name="name"
-            placeholder="Role name"
-            className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
-          />
-          <textarea
-            name="description"
-            placeholder="Description"
-            rows={2}
-            className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
-          />
-          <input
-            name="monthlyCapacity"
-            type="number"
-            step="1"
-            min="0"
-            placeholder="Monthly capacity"
-            className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
-          />
-          <button
-            type="submit"
-            className="w-full rounded-md bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800"
-          >
-            Save role
-          </button>
-        </form>
-        <form onSubmit={handleCreateResource} className="space-y-3 rounded-md border border-slate-200 p-4">
+      <div className="grid gap-6 md:grid-cols-3">
+        <div className="space-y-3 rounded-md border border-slate-200 p-4">
+          <div className="flex items-center justify-between gap-3">
+            <h3 className="text-sm font-semibold text-slate-900">Project Templates</h3>
+            <button
+              type="button"
+              data-testid="create-project"
+              className="rounded-md border border-slate-300 px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100"
+              onClick={() => setProjectFormOpen((previous) => !previous)}
+            >
+              {isProjectFormOpen ? 'Close' : 'Create Project'}
+            </button>
+          </div>
+          {projectName && (
+            <div className="rounded-md bg-slate-50 p-3 text-sm">
+              <h3 className="text-base font-semibold text-slate-900">{projectName}</h3>
+              {templateDescription && (
+                <p className="text-xs text-slate-500">Template: {templateDescription}</p>
+              )}
+            </div>
+          )}
+          {isProjectFormOpen && (
+            <form onSubmit={handleCreateProject} className="space-y-3" data-testid="create-project-form">
+              <div className="space-y-1">
+                <label htmlFor="project-name" className="text-xs font-semibold text-slate-600">
+                  Project Name
+                </label>
+                <input
+                  id="project-name"
+                  name="projectName"
+                  required
+                  className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
+                  placeholder="e.g. Orion Workday Transformation"
+                />
+              </div>
+              <div className="space-y-1">
+                <label htmlFor="project-template" className="text-xs font-semibold text-slate-600">
+                  Template
+                </label>
+                <select
+                  id="project-template"
+                  name="template"
+                  required
+                  className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
+                  defaultValue=""
+                >
+                  <option value="" disabled>
+                    Select a template
+                  </option>
+                  {Object.entries(projectTemplates).map(([id, template]) => (
+                    <option key={id} value={id}>
+                      {template.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <button
+                type="submit"
+                className="w-full rounded-md bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+              >
+                Create Project
+              </button>
+            </form>
+          )}
+        </div>
+        <div className="space-y-3 rounded-md border border-slate-200 p-4 md:col-span-1">
+          <div className="flex items-center justify-between gap-3">
+            <h3 className="text-sm font-semibold text-slate-900">Role Builder</h3>
+            <button
+              type="button"
+              data-testid="add-role"
+              onClick={handleRevealRoleForm}
+              className="rounded-md border border-slate-300 px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100"
+            >
+              Add Role
+            </button>
+          </div>
+          {isRoleFormVisible && (
+            <form onSubmit={handleCreateRole} className="space-y-3" data-testid="role-form">
+              <div className="space-y-1">
+                <label htmlFor="role-name" className="text-xs font-semibold text-slate-600">
+                  Role Name
+                </label>
+                <input
+                  id="role-name"
+                  name="name"
+                  ref={roleNameInputRef}
+                  required
+                  className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
+                />
+              </div>
+              <div className="space-y-1">
+                <label htmlFor="role-category" className="text-xs font-semibold text-slate-600">
+                  Category
+                </label>
+                <input
+                  id="role-category"
+                  name="category"
+                  className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
+                  placeholder="e.g. Change Management"
+                />
+              </div>
+              <div className="space-y-1">
+                <label htmlFor="role-billable-rate" className="text-xs font-semibold text-slate-600">
+                  Billable Rate
+                </label>
+                <input
+                  id="role-billable-rate"
+                  name="monthlyCapacity"
+                  type="number"
+                  min="0"
+                  step="1"
+                  defaultValue={160}
+                  className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
+                />
+              </div>
+              <button
+                type="submit"
+                className="w-full rounded-md bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+              >
+                Save Role
+              </button>
+            </form>
+          )}
+        </div>
+        <form onSubmit={handleCreateResource} className="space-y-3 rounded-md border border-slate-200 p-4" data-testid="resource-form">
           <h3 className="text-sm font-semibold text-slate-900">Add Resource</h3>
-          <select name="roleId" className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm">
-            <option value="">Select role</option>
-            {roleOptions}
-          </select>
-          <input
-            name="name"
-            placeholder="Resource name"
-            className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
-          />
-          <input
-            name="availability"
-            type="number"
-            min="0"
-            max="1.5"
-            step="0.05"
-            placeholder="Availability (FTE)"
-            className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
-          />
+          <div className="space-y-1">
+            <label htmlFor="resource-role" className="text-xs font-semibold text-slate-600">
+              Role
+            </label>
+            <select
+              id="resource-role"
+              name="roleId"
+              required
+              className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
+            >
+              <option value="">Select role</option>
+              {roleOptions}
+            </select>
+          </div>
+          <div className="space-y-1">
+            <label htmlFor="resource-name" className="text-xs font-semibold text-slate-600">
+              Resource Name
+            </label>
+            <input
+              id="resource-name"
+              name="name"
+              required
+              className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
+            />
+          </div>
+          <div className="space-y-1">
+            <label htmlFor="resource-availability" className="text-xs font-semibold text-slate-600">
+              Availability (FTE)
+            </label>
+            <input
+              id="resource-availability"
+              name="availability"
+              type="number"
+              min="0"
+              max="1.5"
+              step="0.05"
+              defaultValue={1}
+              className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
+            />
+          </div>
           <button
             type="submit"
             className="w-full rounded-md bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800"
           >
-            Save resource
+            Save Resource
           </button>
         </form>
       </div>
@@ -215,7 +439,7 @@ export const ResourceManager: React.FC = () => {
                 <div>
                   <p className="font-medium text-slate-900">{role.name}</p>
                   <p className="text-xs text-slate-500">Monthly capacity: {role.monthlyCapacity} hrs</p>
-                  {role.description && <p className="mt-1 text-xs text-slate-600">{role.description}</p>}
+                  {role.description && <p className="mt-1 text-xs text-slate-600">Category: {role.description}</p>}
                 </div>
                 <button
                   type="button"

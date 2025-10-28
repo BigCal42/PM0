@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Section } from '../../components/Section';
 import { useProjectStore } from '../../store/useProjectStore';
 
@@ -20,6 +20,24 @@ export const ExportCenter: React.FC = () => {
     scenarios: state.scenarios,
   }));
   const heatmapRef = useRef<HTMLDivElement | null>(null);
+  const statusTimeoutRef = useRef<number | null>(null);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (statusTimeoutRef.current) {
+        window.clearTimeout(statusTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const notifyDownloadStarted = () => {
+    if (statusTimeoutRef.current) {
+      window.clearTimeout(statusTimeoutRef.current);
+    }
+    setStatusMessage('Download started');
+    statusTimeoutRef.current = window.setTimeout(() => setStatusMessage(null), 2500);
+  };
 
   const handleExportCsv = () => {
     const headers = ['Type', 'Identifier', 'Details'];
@@ -31,6 +49,7 @@ export const ExportCenter: React.FC = () => {
     ];
     const csv = [headers.join(','), ...rows.map((row) => row.map((col) => `"${String(col).replace(/"/g, '""')}"`).join(','))].join('\n');
     triggerDownload('pm0-data-export.csv', csv, 'text/csv');
+    notifyDownloadStarted();
   };
 
   const handleExportPdf = () => {
@@ -39,6 +58,7 @@ export const ExportCenter: React.FC = () => {
       .join('\n\n');
     const pdfContent = `PM0 Scenario Summary\n\n${summary}`;
     triggerDownload('pm0-scenarios.pdf', pdfContent, 'application/pdf');
+    notifyDownloadStarted();
   };
 
   const handleExportPng = () => {
@@ -47,12 +67,21 @@ export const ExportCenter: React.FC = () => {
       .join('\n');
     const pngContent = `PM0 Heatmap Snapshot\n${heatmapText}`;
     triggerDownload('pm0-heatmap.png', pngContent, 'image/png');
+    notifyDownloadStarted();
   };
 
   return (
     <Section title="Export Center" actions={<span className="text-xs text-slate-500">CSV • PDF • PNG</span>}>
       <div ref={heatmapRef} className="space-y-3 text-sm text-slate-600">
         <p>Download structured outputs for executive reporting and offline planning reviews.</p>
+        {statusMessage && (
+          <div
+            role="status"
+            className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700"
+          >
+            {statusMessage}
+          </div>
+        )}
         <div className="flex flex-wrap gap-3">
           <button
             type="button"

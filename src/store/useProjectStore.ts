@@ -54,6 +54,8 @@ type ProjectState = {
   heatmap: HeatmapCell[];
   scenarios: Scenario[];
   selectedScenarioId?: string;
+  projectName: string | null;
+  projectTemplateId: string | null;
   setRoles: (roles: Role[]) => void;
   setResources: (resources: Resource[]) => void;
   setHeatmap: (heatmap: HeatmapCell[]) => void;
@@ -61,6 +63,7 @@ type ProjectState = {
   selectScenario: (id: string | undefined) => void;
   upsertScenario: (scenario: Scenario) => void;
   removeScenario: (id: string) => void;
+  setProjectMetadata: (name: string | null, templateId: string | null) => void;
 };
 
 export const useProjectStore = create<ProjectState>((set) => ({
@@ -69,6 +72,8 @@ export const useProjectStore = create<ProjectState>((set) => ({
   heatmap: [],
   scenarios: [],
   selectedScenarioId: undefined,
+  projectName: null,
+  projectTemplateId: null,
   setRoles: (roles) => set({ roles }),
   setResources: (resources) => set({ resources }),
   setHeatmap: (heatmap) => set({ heatmap }),
@@ -96,5 +101,10 @@ export const useProjectStore = create<ProjectState>((set) => ({
         scenarios: remaining,
         selectedScenarioId: nextSelected,
       };
+    }),
+  setProjectMetadata: (name, templateId) =>
+    set({
+      projectName: name,
+      projectTemplateId: templateId,
     }),
 }));

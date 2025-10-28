@@ -1,3 +1,7 @@
+import { useProjectStore } from '@/store/useProjectStore';
+
+const Header = () => {
+  const { projectName } = useProjectStore((state) => ({ projectName: state.projectName }));
 import { useFeatureFlags } from '@/store/useFeatureFlags';
 
 const Header = () => {
@@ -19,8 +23,10 @@ const Header = () => {
             PM
           </div>
           <div>
-            <p className="text-lg font-semibold">Project Matrix 0</p>
-            <p className="text-sm text-slate-400">Foundational workspace shell</p>
+            <p className="text-lg font-semibold">{projectName ?? 'Project Matrix 0'}</p>
+            <p className="text-sm text-slate-400">
+              {projectName ? 'Active project workspace' : 'Foundational workspace shell'}
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-3 text-sm font-medium text-slate-300">
