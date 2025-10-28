@@ -92,6 +92,27 @@ export const ScenarioGenerator: React.FC = () => {
       setScenarios(normalized);
     },
   });
+import { useFeatureFlags } from '../../store/useFeatureFlags';
+
+const scenarioDefinitions: ScenarioMultiplier[] = [
+  { id: 'baseline', label: 'Baseline', effortMultiplier: 1, durationMultiplier: 1, costMultiplier: 1 },
+  { id: 'accelerated', label: 'Accelerated', effortMultiplier: 1.15, durationMultiplier: 0.85, costMultiplier: 1.2 },
+  { id: 'lean', label: 'Lean', effortMultiplier: 0.92, durationMultiplier: 1, costMultiplier: 0.88 },
+  { id: 'scope-lite', label: 'Scope-Lite', effortMultiplier: 0.75, durationMultiplier: 0.9, costMultiplier: 0.8 },
+  { id: 'high-scope', label: 'High Scope', effortMultiplier: 1.35, durationMultiplier: 1.1, costMultiplier: 1.4 },
+];
+
+export const ScenarioGenerator: React.FC = () => {
+  const queryClient = useQueryClient();
+  const { useDemoData } = useFeatureFlags();
+  const modeKey = useDemoData ? 'demo' : 'live';
+  const scenariosQueryKey = ['scenarios', modeKey] as const;
+  const { scenarios, upsertScenario, removeScenario } = useProjectStore((state) => ({
+    scenarios: state.scenarios,
+    upsertScenario: state.upsertScenario,
+    removeScenario: state.removeScenario,
+  }));
+  const { persistScenario, removeScenario: removeScenarioFromSource } = useResourceDataSource();
 
   const createScenarioMutation = useMutation({
     mutationFn: persistScenario,
@@ -381,6 +402,36 @@ export const ScenarioGenerator: React.FC = () => {
           </div>
         </form>
       )}
+        );
+      }),
+    [createScenarioMutation.isPending, scenarios],
+  );
+
+  return (
+    <Section title="Scenario Generator" actions={<span className="text-xs text-slate-500">{scenarios.length} saved</span>}>
+      <div className="grid gap-4 md:grid-cols-3">{scenarioCards}</div>
+      <div className="rounded-md border border-slate-200 p-4">
+        <h3 className="text-sm font-semibold text-slate-900">Saved Scenarios</h3>
+        <ul className="mt-2 space-y-2 text-sm" data-testid="scenario-list">
+          {scenarios.map((scenario) => (
+            <li key={scenario.id} className="flex items-start justify-between rounded-md border border-slate-200 p-3">
+              <div>
+                <p className="font-medium text-slate-900">{scenario.name}</p>
+                <p className="text-xs text-slate-500">Total cost: ${scenario.results.totalCost.toLocaleString()}</p>
+                <p className="text-xs text-slate-500">Risk score: {scenario.results.riskScore}</p>
+              </div>
+              <button
+                type="button"
+                className="rounded-md px-2 py-1 text-xs font-semibold text-red-600 hover:bg-red-50"
+                onClick={() => handleDeleteScenario(scenario.id)}
+              >
+                Delete
+              </button>
+            </li>
+          ))}
+          {!scenarios.length && <p className="text-xs text-slate-500">Generate scenarios to compare assumptions.</p>}
+        </ul>
+      </div>
     </Section>
   );
 };

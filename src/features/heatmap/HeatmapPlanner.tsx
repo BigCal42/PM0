@@ -54,7 +54,7 @@ export const HeatmapPlanner: React.FC = () => {
         </span>
       }
     >
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto" data-testid="heatmap-grid">
         <div className="min-w-[640px]">
           <div className="grid grid-cols-[220px_repeat(auto-fill,minmax(120px,1fr))] gap-px rounded-md border border-slate-200 bg-slate-200 text-xs">
             <div className="bg-slate-50 px-3 py-2 font-semibold uppercase tracking-wide text-slate-500">Role</div>
