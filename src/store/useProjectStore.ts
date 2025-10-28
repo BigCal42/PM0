@@ -30,16 +30,22 @@ export type ScenarioMultiplier = {
   costMultiplier: number;
 };
 
+export type ScenarioResults = {
+  totalCost: number;
+  totalFte?: number;
+  riskScore?: number;
+  totalHours?: number;
+  vendorSpendPct?: number;
+  readinessScore?: number;
+  durationMonths?: number;
+};
+
 export type Scenario = {
   id: string;
   name: string;
   multipliers: ScenarioMultiplier;
   assumptions: Record<string, unknown>;
-  results: {
-    totalCost: number;
-    totalFte: number;
-    riskScore: number;
-  };
+  results: ScenarioResults;
 };
 
 type ProjectState = {
