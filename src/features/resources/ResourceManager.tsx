@@ -14,9 +14,6 @@ import { nanoid } from '../../utils/nanoid';
 import { useFeatureFlags } from '../../store/useFeatureFlags';
 import { demoHeatmap, demoResources, demoRoles, demoScenarios } from '../../lib/demoData';
 
-const rolesQueryKey = ['roles'];
-const resourcesQueryKey = ['resources'];
-
 type ProjectTemplate = {
   label: string;
   roles: Role[];
@@ -45,6 +42,9 @@ const projectTemplates: Record<string, ProjectTemplate> = {
 export const ResourceManager: React.FC = () => {
   const queryClient = useQueryClient();
   const { useDemoData } = useFeatureFlags();
+  const modeKey = useDemoData ? 'demo' : 'live';
+  const rolesQueryKey = ['roles', modeKey] as const;
+  const resourcesQueryKey = ['resources', modeKey] as const;
   const {
     setRoles,
     setResources,
@@ -56,13 +56,6 @@ export const ResourceManager: React.FC = () => {
     projectName,
     projectTemplateId,
   } = useProjectStore((state) => ({
-export const ResourceManager: React.FC = () => {
-  const queryClient = useQueryClient();
-  const { useDemoData } = useFeatureFlags();
-  const modeKey = useDemoData ? 'demo' : 'live';
-  const rolesQueryKey = ['roles', modeKey] as const;
-  const resourcesQueryKey = ['resources', modeKey] as const;
-  const { setRoles, setResources, roles, resources } = useProjectStore((state) => ({
     roles: state.roles,
     resources: state.resources,
     setRoles: state.setRoles,
