@@ -14,18 +14,11 @@ if [[ -f "$OUTPUT_FILE" ]]; then
   exit 0
 fi
 
-# If types don't exist, we need to generate them
-if [[ -z "$PROJECT_REF" ]]; then
-  echo "✗ [typegen] ERROR: SUPABASE_PROJECT_REF not set and types don't exist." >&2
-  echo "  Run: SUPABASE_PROJECT_REF=<your-ref> npm run typegen" >&2
-  echo "  Or commit generated types to the repository." >&2
-  exit 1
-fi
-
-if ! command -v supabase >/dev/null 2>&1; then
-  echo "✗ [typegen] ERROR: Supabase CLI not installed." >&2
-  echo "  Install: https://supabase.com/docs/guides/cli" >&2
-  exit 1
+# Use fallback types if generation is unavailable
+if [[ -z "$PROJECT_REF" ]] || ! command -v supabase >/dev/null 2>&1; then
+  echo "⚠ [typegen] Using fallback types (missing SUPABASE_PROJECT_REF or Supabase CLI)" >&2
+  cp "${ROOT_DIR}/src/types/database.fallback.ts" "$OUTPUT_FILE"
+  exit 0
 fi
 
 echo "→ [typegen] Generating types for project '$PROJECT_REF' (schema: $SCHEMA)..." >&2
