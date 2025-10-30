@@ -1,7 +1,7 @@
 {
   "$schema": "https://schemas.mcp.dev/mcp.json",
   "version": 1,
-  "servers": {
+  "mcpServers": {
     "vercel": {
       "command": "npx",
       "args": ["-y", "@vercel/mcp@latest"],
