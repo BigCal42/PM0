@@ -1,0 +1,15 @@
+{
+  "$schema": "https://schemas.mcp.dev/mcp.json",
+  "version": 1,
+  "servers": {
+    "vercel": {
+      "command": "npx",
+      "args": ["-y", "@vercel/mcp@latest"],
+      "env": {
+        "VERCEL_ACCESS_TOKEN": "${VERCEL_ACCESS_TOKEN}",
+        "VERCEL_ORG_ID": "${VERCEL_ORG_ID}",
+        "VERCEL_PROJECT_ID": "${VERCEL_PROJECT_ID}"
+      }
+    }
+  }
+}
