@@ -1,0 +1,35 @@
+{
+  "projects": [
+    {
+      "id": "demo-1",
+      "name": "Epic Implementation - Phase 1",
+      "status": "active",
+      "createdAt": "2025-01-15T10:00:00Z",
+      "updatedAt": "2025-01-20T14:30:00Z"
+    },
+    {
+      "id": "demo-2",
+      "name": "Workday HR Transformation",
+      "status": "draft",
+      "createdAt": "2025-01-10T09:00:00Z",
+      "updatedAt": "2025-01-12T11:00:00Z"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "scenario-1",
+      "projectId": "demo-1",
+      "name": "Baseline Scenario",
+      "type": "baseline",
+      "createdAt": "2025-01-16T10:00:00Z"
+    },
+    {
+      "id": "scenario-2",
+      "projectId": "demo-1",
+      "name": "Accelerated Timeline",
+      "type": "accelerated",
+      "createdAt": "2025-01-17T10:00:00Z"
+    }
+  ]
+}
+
