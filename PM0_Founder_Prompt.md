@@ -351,9 +351,10 @@ When working in agent mode, ensure:
 
 - **Repository:** https://github.com/BigCal42/PM0
 - **Strategic Blueprint:** `PM0_Strategic_Product_Blueprint_v2.0.md`
+- **Technical Blueprint:** `docs/TECHNICAL_BLUEPRINT.md`
+- **Data Model:** `docs/DATA_MODEL.md`
 - **Architecture Docs:** `docs/architecture_v2/README.md`
 - **Verification Report:** `VERIFICATION_REPORT.md`
-- **Knowledge Base:** `PM0_REPO_KNOWLEDGE_BASE.md` (if exists)
 
 ---
 
