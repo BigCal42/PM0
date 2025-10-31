@@ -21,6 +21,10 @@ export function Dashboard() {
     toast.warning('Gap analysis coming soon!', 'This feature will be available in the next release.');
   };
 
+  const handleCreateProject = () => {
+    navigate('/discovery');
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
@@ -30,6 +34,12 @@ export function Dashboard() {
         <p className="text-gray-600">
           Plan Smarter. Start Aligned.
         </p>
+      </div>
+
+      <div className="mb-6">
+        <Button onClick={handleCreateProject} className="mb-4">
+          + Create New Project
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

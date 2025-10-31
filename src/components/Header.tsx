@@ -10,6 +10,12 @@ export function Header() {
         </Link>
         <nav className="flex items-center gap-6">
           <Link
+            to="/discovery"
+            className="text-blue-600 hover:text-blue-700 font-medium transition-colors"
+          >
+            + New Project
+          </Link>
+          <Link
             to="/projects"
             className="text-gray-600 hover:text-gray-900 transition-colors"
           >

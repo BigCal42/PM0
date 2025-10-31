@@ -9,6 +9,7 @@ import { Toaster } from '@/components/Toaster';
 import { Dashboard } from '@/routes/Dashboard';
 import { Projects } from '@/routes/Projects';
 import { Scenarios } from '@/routes/Scenarios';
+import { Discovery } from '@/routes/Discovery';
 import { Login } from '@/routes/Login';
 import { queryClient } from '@/lib/queryClient';
 import { logger } from '@/lib/logger';
@@ -36,6 +37,7 @@ function App() {
                             <Route path="/" element={<Dashboard />} />
                             <Route path="/projects" element={<Projects />} />
                             <Route path="/scenarios" element={<Scenarios />} />
+                            <Route path="/discovery" element={<Discovery />} />
                             <Route path="/admin" element={<div>Admin (guarded)</div>} />
                             <Route path="*" element={<Navigate to="/" replace />} />
                           </Routes>
