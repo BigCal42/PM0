@@ -1,6 +1,5 @@
 import { lazy, Suspense } from 'react';
 import { Loading } from '@/components/Loading';
-import { Card } from '@/components/Card';
 
 const ProjectsContent = lazy(() =>
   import('./ProjectsContent').then((m) => ({ default: m.ProjectsContent }))
@@ -20,18 +19,6 @@ export function Projects() {
         <ProjectsContent />
       </Suspense>
     </div>
-  );
-}
-
-// Lazy-loaded content component
-export function ProjectsContent() {
-  return (
-    <Card title="Your Projects">
-      <p className="text-gray-600">
-        Project management features coming soon. This page demonstrates
-        code-splitting for heavy components.
-      </p>
-    </Card>
   );
 }
 

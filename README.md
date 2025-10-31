@@ -180,4 +180,5 @@ See LICENSE file for details.
 
 - [Strategic Product Blueprint](./PM0_Strategic_Product_Blueprint_v2.0.md)
 - [Repository Knowledge Base](./PM0_REPO_KNOWLEDGE_BASE.md)
+- [Architecture Documentation](./docs/architecture_v2/README.md)
 

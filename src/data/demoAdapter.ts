@@ -6,7 +6,7 @@ import demoData from '../../data/demo.json';
  */
 export const demoAdapter: DataAdapter = {
   async getProjects(): Promise<Project[]> {
-    return demoData.projects || [];
+    return (demoData.projects || []) as Project[];
   },
 
   async getProject(id: string): Promise<Project | null> {
@@ -15,7 +15,7 @@ export const demoAdapter: DataAdapter = {
   },
 
   async getScenarios(projectId: string): Promise<Scenario[]> {
-    return (demoData.scenarios || []).filter((s) => s.projectId === projectId);
+    return ((demoData.scenarios || []).filter((s) => s.projectId === projectId)) as Scenario[];
   },
 };
 
