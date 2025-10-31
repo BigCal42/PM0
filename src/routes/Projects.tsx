@@ -18,10 +18,10 @@ export function Projects() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 min-h-screen">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Projects</h1>
-        <p className="text-gray-600">
+        <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">Projects</h1>
+        <p className="text-dark-text-muted text-lg">
           Manage your strategic planning projects
         </p>
       </div>
@@ -36,12 +36,12 @@ export function Projects() {
               project.name,
               <span
                 key={`status-${project.id}`}
-                className={`px-2 py-1 rounded text-xs font-medium ${
+                className={`px-3 py-1 rounded-full text-xs font-medium ${
                   project.status === 'active'
-                    ? 'bg-green-100 text-green-800'
+                    ? 'bg-green-500/20 text-green-400 border border-green-500/30'
                     : project.status === 'completed'
-                    ? 'bg-blue-100 text-blue-800'
-                    : 'bg-gray-100 text-gray-800'
+                    ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                    : 'bg-dark-surface text-dark-text-muted border border-dark-border'
                 }`}
               >
                 {project.status}

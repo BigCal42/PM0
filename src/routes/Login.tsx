@@ -56,12 +56,12 @@ export function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <Card className="w-full max-w-md">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">
+    <div className="min-h-screen flex items-center justify-center bg-dark-bg px-4 bg-gradient-to-br from-dark-bg via-dark-surface to-dark-bg">
+      <Card className="w-full max-w-md border-blue-500/30">
+        <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
           {isSignUp ? 'Create Account' : 'Sign In'}
         </h1>
-        <p className="text-gray-600 mb-6">
+        <p className="text-dark-text-muted mb-6">
           {isSignUp
             ? 'Get started with PM0'
             : 'Welcome back to PM0'}
@@ -69,7 +69,7 @@ export function Login() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="email" className="block text-sm font-medium text-dark-text mb-1">
               Email
             </label>
             <input
@@ -78,13 +78,13 @@ export function Login() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 bg-dark-surface border border-dark-border rounded-lg text-dark-text placeholder-dark-text-muted focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
               placeholder="you@example.com"
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="password" className="block text-sm font-medium text-dark-text mb-1">
               Password
             </label>
             <input
@@ -93,7 +93,7 @@ export function Login() {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 bg-dark-surface border border-dark-border rounded-lg text-dark-text placeholder-dark-text-muted focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
               placeholder="••••••••"
               minLength={6}
             />
@@ -108,7 +108,7 @@ export function Login() {
           <button
             type="button"
             onClick={() => setIsSignUp(!isSignUp)}
-            className="text-sm text-blue-600 hover:text-blue-700"
+            className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
           >
             {isSignUp
               ? 'Already have an account? Sign in'

@@ -137,7 +137,7 @@ export function DiscoveryWizard({ onSubmit, onCancel, initialData, onDataChange 
   return (
     <div className="max-w-4xl mx-auto">
       <Card title={`Step ${currentStep + 1} of ${STEPS.length}: ${STEPS[currentStep].title}`}>
-        <p className="text-gray-600 mb-6">{STEPS[currentStep].description}</p>
+        <p className="text-dark-text-muted mb-6">{STEPS[currentStep].description}</p>
 
         {/* Progress indicator */}
         <div className="mb-8">
@@ -146,12 +146,12 @@ export function DiscoveryWizard({ onSubmit, onCancel, initialData, onDataChange 
               <div
                 key={step.id}
                 className={`flex-1 h-2 mx-1 rounded ${
-                  index <= currentStep ? 'bg-blue-600' : 'bg-gray-200'
+                  index <= currentStep ? 'bg-gradient-to-r from-blue-500 to-purple-600' : 'bg-dark-border'
                 }`}
               />
             ))}
           </div>
-          <div className="flex justify-between text-xs text-gray-500">
+          <div className="flex justify-between text-xs text-dark-text-muted">
             {STEPS.map((step) => (
               <span key={step.id}>{step.title}</span>
             ))}
@@ -180,7 +180,7 @@ export function DiscoveryWizard({ onSubmit, onCancel, initialData, onDataChange 
               {currentStep === 0 && (
                 <div className="space-y-4">
                   <div>
-                    <label htmlFor="projectName" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="projectName" className="block text-sm font-medium text-dark-text mb-1">
                       Project Name *
                     </label>
                     <input
@@ -192,17 +192,17 @@ export function DiscoveryWizard({ onSubmit, onCancel, initialData, onDataChange 
                       className={`w-full px-3 py-2 border rounded-md ${
                         errors.projectName && touched.projectName
                           ? 'border-red-500'
-                          : 'border-gray-300'
+                          : 'border-dark-border bg-dark-surface text-dark-text'
                       }`}
                       placeholder="e.g., Epic EHR Implementation"
                     />
                     {errors.projectName && touched.projectName && (
-                      <p className="mt-1 text-sm text-red-600">{errors.projectName}</p>
+                      <p className="mt-1 text-sm text-red-400">{errors.projectName}</p>
                     )}
                   </div>
 
                   <div>
-                    <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="description" className="block text-sm font-medium text-dark-text mb-1">
                       Description *
                     </label>
                     <textarea
@@ -214,17 +214,17 @@ export function DiscoveryWizard({ onSubmit, onCancel, initialData, onDataChange 
                       className={`w-full px-3 py-2 border rounded-md ${
                         errors.description && touched.description
                           ? 'border-red-500'
-                          : 'border-gray-300'
+                          : 'border-dark-border bg-dark-surface text-dark-text'
                       }`}
                       placeholder="Describe your transformation project..."
                     />
                     {errors.description && touched.description && (
-                      <p className="mt-1 text-sm text-red-600">{errors.description}</p>
+                      <p className="mt-1 text-sm text-red-400">{errors.description}</p>
                     )}
                   </div>
 
                   <div>
-                    <label htmlFor="domain" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="domain" className="block text-sm font-medium text-dark-text mb-1">
                       Domain / System *
                     </label>
                     <select
@@ -233,7 +233,7 @@ export function DiscoveryWizard({ onSubmit, onCancel, initialData, onDataChange 
                       value={values.domain}
                       onChange={handleChange}
                       className={`w-full px-3 py-2 border rounded-md ${
-                        errors.domain && touched.domain ? 'border-red-500' : 'border-gray-300'
+                        errors.domain && touched.domain ? 'border-red-500' : 'border-dark-border bg-dark-surface text-dark-text'
                       }`}
                     >
                       {DOMAIN_OPTIONS.map((option) => (
@@ -243,7 +243,7 @@ export function DiscoveryWizard({ onSubmit, onCancel, initialData, onDataChange 
                       ))}
                     </select>
                     {errors.domain && touched.domain && (
-                      <p className="mt-1 text-sm text-red-600">{errors.domain}</p>
+                      <p className="mt-1 text-sm text-red-400">{errors.domain}</p>
                     )}
                   </div>
                 </div>
@@ -253,7 +253,7 @@ export function DiscoveryWizard({ onSubmit, onCancel, initialData, onDataChange 
               {currentStep === 1 && (
                 <div className="space-y-4">
                   <div>
-                    <label htmlFor="userCount" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="userCount" className="block text-sm font-medium text-dark-text mb-1">
                       Estimated User Count *
                     </label>
                     <input
@@ -264,16 +264,16 @@ export function DiscoveryWizard({ onSubmit, onCancel, initialData, onDataChange 
                       value={values.userCount}
                       onChange={handleChange}
                       className={`w-full px-3 py-2 border rounded-md ${
-                        errors.userCount && touched.userCount ? 'border-red-500' : 'border-gray-300'
+                        errors.userCount && touched.userCount ? 'border-red-500' : 'border-dark-border bg-dark-surface text-dark-text'
                       }`}
                     />
                     {errors.userCount && touched.userCount && (
-                      <p className="mt-1 text-sm text-red-600">{errors.userCount}</p>
+                      <p className="mt-1 text-sm text-red-400">{errors.userCount}</p>
                     )}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-dark-text mb-1">
                       Geographic Locations *
                     </label>
                     <input
@@ -287,15 +287,15 @@ export function DiscoveryWizard({ onSubmit, onCancel, initialData, onDataChange 
                           .filter(Boolean);
                         setFieldValue('geographicLocations', locations);
                       }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                      className="w-full px-3 py-2 border border-dark-border bg-dark-surface text-dark-text rounded-md"
                     />
                     {errors.geographicLocations && touched.geographicLocations && (
-                      <p className="mt-1 text-sm text-red-600">{errors.geographicLocations}</p>
+                      <p className="mt-1 text-sm text-red-400">{errors.geographicLocations}</p>
                     )}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-dark-text mb-1">
                       Business Units *
                     </label>
                     <input
@@ -309,10 +309,10 @@ export function DiscoveryWizard({ onSubmit, onCancel, initialData, onDataChange 
                           .filter(Boolean);
                         setFieldValue('businessUnits', units);
                       }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                      className="w-full px-3 py-2 border border-dark-border bg-dark-surface text-dark-text rounded-md"
                     />
                     {errors.businessUnits && touched.businessUnits && (
-                      <p className="mt-1 text-sm text-red-600">{errors.businessUnits}</p>
+                      <p className="mt-1 text-sm text-red-400">{errors.businessUnits}</p>
                     )}
                   </div>
                 </div>
@@ -322,7 +322,7 @@ export function DiscoveryWizard({ onSubmit, onCancel, initialData, onDataChange 
               {currentStep === 2 && (
                 <div className="space-y-4">
                   <div>
-                    <label htmlFor="targetGoLiveDate" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="targetGoLiveDate" className="block text-sm font-medium text-dark-text mb-1">
                       Target Go-Live Date
                     </label>
                     <input
@@ -331,12 +331,12 @@ export function DiscoveryWizard({ onSubmit, onCancel, initialData, onDataChange 
                       type="date"
                       value={values.targetGoLiveDate}
                       onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                      className="w-full px-3 py-2 border border-dark-border bg-dark-surface text-dark-text rounded-md"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-dark-text mb-1">
                       Hard Deadlines
                     </label>
                     <input
@@ -350,12 +350,12 @@ export function DiscoveryWizard({ onSubmit, onCancel, initialData, onDataChange 
                           .filter(Boolean);
                         setFieldValue('hardDeadlines', deadlines);
                       }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                      className="w-full px-3 py-2 border border-dark-border bg-dark-surface text-dark-text rounded-md"
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="budgetRange" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="budgetRange" className="block text-sm font-medium text-dark-text mb-1">
                       Budget Range
                     </label>
                     <select
@@ -363,7 +363,7 @@ export function DiscoveryWizard({ onSubmit, onCancel, initialData, onDataChange 
                       name="budgetRange"
                       value={values.budgetRange}
                       onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                      className="w-full px-3 py-2 border border-dark-border bg-dark-surface text-dark-text rounded-md"
                     >
                       <option value="">Select budget range</option>
                       <option value="under-500k">Under $500K</option>
@@ -380,7 +380,7 @@ export function DiscoveryWizard({ onSubmit, onCancel, initialData, onDataChange 
               {currentStep === 3 && (
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-dark-text mb-1">
                       Must-Have Features
                     </label>
                     <textarea
@@ -394,12 +394,12 @@ export function DiscoveryWizard({ onSubmit, onCancel, initialData, onDataChange 
                         setFieldValue('mustHaveFeatures', features);
                       }}
                       rows={4}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                      className="w-full px-3 py-2 border border-dark-border bg-dark-surface text-dark-text rounded-md"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-dark-text mb-1">
                       Nice-to-Have Features
                     </label>
                     <textarea
@@ -413,12 +413,12 @@ export function DiscoveryWizard({ onSubmit, onCancel, initialData, onDataChange 
                         setFieldValue('niceToHaveFeatures', features);
                       }}
                       rows={4}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                      className="w-full px-3 py-2 border border-dark-border bg-dark-surface text-dark-text rounded-md"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-dark-text mb-1">
                       Integration Requirements
                     </label>
                     <input
@@ -432,7 +432,7 @@ export function DiscoveryWizard({ onSubmit, onCancel, initialData, onDataChange 
                           .filter(Boolean);
                         setFieldValue('integrationRequirements', integrations);
                       }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                      className="w-full px-3 py-2 border border-dark-border bg-dark-surface text-dark-text rounded-md"
                     />
                   </div>
                 </div>
@@ -442,7 +442,7 @@ export function DiscoveryWizard({ onSubmit, onCancel, initialData, onDataChange 
               {currentStep === 4 && (
                 <div className="space-y-4">
                   <div>
-                    <label htmlFor="currentSystem" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="currentSystem" className="block text-sm font-medium text-dark-text mb-1">
                       Current System
                     </label>
                     <input
@@ -452,12 +452,12 @@ export function DiscoveryWizard({ onSubmit, onCancel, initialData, onDataChange 
                       value={values.currentSystem}
                       onChange={handleChange}
                       placeholder="e.g., Legacy Epic, On-premise SAP"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                      className="w-full px-3 py-2 border border-dark-border bg-dark-surface text-dark-text rounded-md"
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="migrationType" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="migrationType" className="block text-sm font-medium text-dark-text mb-1">
                       Migration Type *
                     </label>
                     <select
@@ -468,7 +468,7 @@ export function DiscoveryWizard({ onSubmit, onCancel, initialData, onDataChange 
                       className={`w-full px-3 py-2 border rounded-md ${
                         errors.migrationType && touched.migrationType
                           ? 'border-red-500'
-                          : 'border-gray-300'
+                          : 'border-dark-border bg-dark-surface text-dark-text'
                       }`}
                     >
                       <option value="new-implementation">New Implementation</option>
@@ -477,12 +477,12 @@ export function DiscoveryWizard({ onSubmit, onCancel, initialData, onDataChange 
                       <option value="replacement">Replacement</option>
                     </select>
                     {errors.migrationType && touched.migrationType && (
-                      <p className="mt-1 text-sm text-red-600">{errors.migrationType}</p>
+                      <p className="mt-1 text-sm text-red-400">{errors.migrationType}</p>
                     )}
                   </div>
 
                   <div>
-                    <label htmlFor="changeManagementReadiness" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="changeManagementReadiness" className="block text-sm font-medium text-dark-text mb-1">
                       Change Management Readiness *
                     </label>
                     <select
@@ -493,7 +493,7 @@ export function DiscoveryWizard({ onSubmit, onCancel, initialData, onDataChange 
                       className={`w-full px-3 py-2 border rounded-md ${
                         errors.changeManagementReadiness && touched.changeManagementReadiness
                           ? 'border-red-500'
-                          : 'border-gray-300'
+                          : 'border-dark-border bg-dark-surface text-dark-text'
                       }`}
                     >
                       <option value="low">Low - Minimal change management experience</option>
@@ -501,7 +501,7 @@ export function DiscoveryWizard({ onSubmit, onCancel, initialData, onDataChange 
                       <option value="high">High - Strong change management maturity</option>
                     </select>
                     {errors.changeManagementReadiness && touched.changeManagementReadiness && (
-                      <p className="mt-1 text-sm text-red-600">{errors.changeManagementReadiness}</p>
+                      <p className="mt-1 text-sm text-red-400">{errors.changeManagementReadiness}</p>
                     )}
                   </div>
                 </div>

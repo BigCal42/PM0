@@ -12,12 +12,12 @@ export function Button({
   ...props
 }: ButtonProps) {
   const baseClasses =
-    'px-4 py-2 rounded font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed';
+    'px-6 py-3 rounded-lg font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl';
   
   const variantClasses = {
-    primary: 'bg-blue-600 text-white hover:bg-blue-700',
-    secondary: 'bg-gray-200 text-gray-900 hover:bg-gray-300',
-    danger: 'bg-red-600 text-white hover:bg-red-700',
+    primary: 'bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700 border border-blue-400/20',
+    secondary: 'bg-dark-surface text-dark-text border border-dark-border hover:bg-dark-card hover:border-blue-500/50',
+    danger: 'bg-gradient-to-r from-red-600 to-pink-600 text-white hover:from-red-700 hover:to-pink-700 border border-red-400/20',
   };
 
   return (

@@ -26,7 +26,7 @@ export function UserMenu() {
 
   return (
     <div className="flex items-center gap-4">
-      <span className="text-sm text-gray-600">
+      <span className="text-sm text-dark-text-muted">
         {user.name || user.email}
       </span>
       <Button variant="secondary" onClick={handleSignOut}>
