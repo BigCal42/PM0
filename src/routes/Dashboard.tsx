@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/Card';
 import { Button } from '@/components/Button';
 import { useToast } from '@/hooks/useToast';
+import { isPlaygroundEnabled } from '@/lib/flags';
 
 export function Dashboard() {
   const navigate = useNavigate();
@@ -25,6 +26,10 @@ export function Dashboard() {
     navigate('/discovery');
   };
 
+  const handleOpenPlayground = () => {
+    navigate('/hub');
+  };
+
   return (
     <div className="container mx-auto px-4 py-8 min-h-screen">
       <div className="mb-8">
@@ -40,6 +45,11 @@ export function Dashboard() {
         <Button onClick={handleCreateProject} className="mb-4 shadow-2xl">
           ✨ Create New Project
         </Button>
+        {isPlaygroundEnabled() && (
+          <Button onClick={handleOpenPlayground} variant="secondary" className="mb-4 ml-2">
+            🚀 Open Playground
+          </Button>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
