@@ -4,6 +4,9 @@
 
 import type { Department, Employee, Schedule, ScheduleAssignment, LaborMetric, EmployeeSentiment } from './types';
 
+// Re-export types for use in other modules
+export type { Department, Employee, Schedule, ScheduleAssignment, LaborMetric, EmployeeSentiment };
+
 export interface WorkforceAdapter {
   // Departments
   getDepartments(organizationId: string): Promise<Department[]>;

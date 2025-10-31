@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Card } from '@/components/Card';
 import { Button } from '@/components/Button';
 import { Loading } from '@/components/Loading';
-import { useBudgets, useFinancialPeriods, useCreateBudget } from '@/hooks/useBudget';
+import { useBudgets, useFinancialPeriods } from '@/hooks/useBudget';
 import { useToast } from '@/hooks/useToast';
 import type { Budget } from '@/data/types';
 
@@ -15,7 +15,7 @@ export function Budget() {
   
   const { data: periods, isLoading: periodsLoading } = useFinancialPeriods(MOCK_ORG_ID);
   const { data: budgets, isLoading: budgetsLoading } = useBudgets(MOCK_ORG_ID, selectedPeriodId);
-  const createBudget = useCreateBudget();
+  // const createBudget = useCreateBudget(); // TODO: Implement create budget functionality
 
   const isLoading = periodsLoading || budgetsLoading;
 
@@ -54,7 +54,7 @@ export function Budget() {
     }).format(amount);
   };
 
-  const getVarianceColor = (variance: number, percentage: number) => {
+  const getVarianceColor = (_varianceAmount: number, percentage: number) => {
     if (percentage > 5) return 'text-red-400';
     if (percentage < -5) return 'text-green-400';
     return 'text-yellow-400';

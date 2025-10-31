@@ -4,6 +4,9 @@
 
 import type { FinancialPeriod, Budget, CostDriver, RevenueStream } from './types';
 
+// Re-export types for use in other modules
+export type { FinancialPeriod, Budget, CostDriver, RevenueStream };
+
 export interface FinancialAdapter {
   // Financial Periods
   getFinancialPeriods(organizationId: string): Promise<FinancialPeriod[]>;

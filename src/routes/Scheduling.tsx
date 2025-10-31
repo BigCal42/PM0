@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Card } from '@/components/Card';
 import { Button } from '@/components/Button';
 import { Loading } from '@/components/Loading';
-import { useSchedules, useDepartments, useScheduleAssignments, useCreateSchedule } from '@/hooks/useWorkforce';
+import { useSchedules, useDepartments, useScheduleAssignments } from '@/hooks/useWorkforce';
 import { useToast } from '@/hooks/useToast';
 
 // TODO: Get from auth context when available
@@ -18,7 +18,7 @@ export function Scheduling() {
   const { data: assignments, isLoading: assignmentsLoading } = useScheduleAssignments(
     selectedScheduleId || ''
   );
-  const createSchedule = useCreateSchedule();
+  // const createSchedule = useCreateSchedule(); // TODO: Implement create schedule functionality
 
   const isLoading = deptsLoading || schedulesLoading;
 
@@ -178,7 +178,7 @@ export function Scheduling() {
               ) : (
                 <div className="text-center py-8">
                   <p className="text-dark-text-muted text-sm mb-4">No assignments yet</p>
-                  <Button size="sm" variant="secondary">
+                  <Button variant="secondary" className="text-sm px-4 py-2">
                     + Add Assignment
                   </Button>
                 </div>
