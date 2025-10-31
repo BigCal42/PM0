@@ -22,10 +22,16 @@ export function Header() {
             Projects
           </Link>
           <Link
-            to="/scenarios"
+            to="/finance/budget"
             className="text-dark-text-muted hover:text-dark-text transition-colors"
           >
-            Scenarios
+            Budgets
+          </Link>
+          <Link
+            to="/workforce/scheduling"
+            className="text-dark-text-muted hover:text-dark-text transition-colors"
+          >
+            Scheduling
           </Link>
           <UserMenu />
         </nav>

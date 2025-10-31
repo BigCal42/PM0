@@ -11,6 +11,8 @@ import { Projects } from '@/routes/Projects';
 import { Scenarios } from '@/routes/Scenarios';
 import { Discovery } from '@/routes/Discovery';
 import { Login } from '@/routes/Login';
+import { Budget } from '@/routes/Budget';
+import { Scheduling } from '@/routes/Scheduling';
 import { queryClient } from '@/lib/queryClient';
 import { logger } from '@/lib/logger';
 import { env } from '@/lib/env';
@@ -38,6 +40,8 @@ function App() {
                             <Route path="/projects" element={<Projects />} />
                             <Route path="/scenarios" element={<Scenarios />} />
                             <Route path="/discovery" element={<Discovery />} />
+                            <Route path="/finance/budget" element={<Budget />} />
+                            <Route path="/workforce/scheduling" element={<Scheduling />} />
                             <Route path="/admin" element={<div>Admin (guarded)</div>} />
                             <Route path="*" element={<Navigate to="/" replace />} />
                           </Routes>

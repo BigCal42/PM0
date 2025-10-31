@@ -57,7 +57,21 @@ export function Dashboard() {
           <Button onClick={handleExploreScenarios} variant="secondary">Explore Scenarios</Button>
         </Card>
 
-        <Card title="Gap Analysis" className="hover:shadow-pink-500/20">
+        <Card title="Budget Management" className="hover:shadow-green-500/20">
+          <p className="text-dark-text-muted mb-4">
+            Track and manage financial budgets
+          </p>
+          <Button onClick={() => navigate('/finance/budget')} variant="secondary">View Budgets</Button>
+        </Card>
+
+        <Card title="Workforce Scheduling" className="hover:shadow-pink-500/20">
+          <p className="text-dark-text-muted mb-4">
+            Manage staff schedules and assignments
+          </p>
+          <Button onClick={() => navigate('/workforce/scheduling')} variant="secondary">View Schedules</Button>
+        </Card>
+
+        <Card title="Gap Analysis" className="hover:shadow-orange-500/20">
           <p className="text-dark-text-muted mb-4">
             Identify resource and capability gaps
           </p>
