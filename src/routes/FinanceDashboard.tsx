@@ -1,5 +1,12 @@
 import { useState } from 'react';
 import { Card } from '@/components/Card';
+import { LineChart, BarChart, DonutChart } from '@/components/Charts';
+import { ForecastChart } from '@/components/ForecastChart';
+import { ComparisonView } from '@/components/ComparisonView';
+import { AdvancedFilter, FilterCriterion } from '@/components/AdvancedFilter';
+import { ExportManager } from '@/lib/export/ExportManager';
+import { useSmartDataRefresh } from '@/hooks/useDataRefresh';
+import { Download, TrendingUp, RefreshCw } from 'lucide-react';
 
 interface MetricCardProps {
   title: string;
@@ -39,6 +46,16 @@ const MetricCard = ({ title, value, change, changeLabel, trend = 'neutral', icon
 
 export function FinanceDashboard() {
   const [selectedPeriod, setSelectedPeriod] = useState('Q1 2025');
+  const [activeTab, setActiveTab] = useState<'overview' | 'trends' | 'comparison' | 'forecast'>('overview');
+  
+  // Real-time data refresh
+  const { lastRefresh, isRefreshing, refresh } = useSmartDataRefresh({
+    refreshInterval: 60000,
+    onRefresh: async () => {
+      // Refresh data here
+      console.log('Refreshing financial data...');
+    },
+  });
 
   // Mock data - will be replaced with real API calls
   const financialMetrics = {
@@ -50,6 +67,68 @@ export function FinanceDashboard() {
     denialRate: 8.2,
     collectionRate: 88.5,
   };
+
+  // Trend data for charts
+  const revenueTrend = [
+    { label: 'Jan', value: 10200000 },
+    { label: 'Feb', value: 10800000 },
+    { label: 'Mar', value: 11500000 },
+  ];
+
+  // Cost trend data for future use
+  // const costTrend = [
+  //   { label: 'Jan', value: 7800000 },
+  //   { label: 'Feb', value: 8200000 },
+  //   { label: 'Mar', value: 8350000 },
+  // ];
+
+  const payerMixData = [
+    { label: 'Medicare', value: 12500000, color: '#3b82f6' },
+    { label: 'Commercial', value: 9800000, color: '#8b5cf6' },
+    { label: 'Medicaid', value: 4200000, color: '#10b981' },
+    { label: 'Self-Pay', value: 2250000, color: '#f59e0b' },
+  ];
+
+  const historicalData = [
+    { date: '2024-10', value: 29500000 },
+    { date: '2024-11', value: 30200000 },
+    { date: '2024-12', value: 31000000 },
+    { date: '2025-01', value: 10200000 },
+    { date: '2025-02', value: 10800000 },
+    { date: '2025-03', value: 11500000 },
+  ];
+
+  const benchmarkData = [
+    { label: 'Collection Rate', value: 88.5, benchmark: 92.0 },
+    { label: 'Days in A/R', value: 42, benchmark: 35 },
+    { label: 'Net Revenue', value: 28750000, benchmark: 30000000 },
+    { label: 'Operating Margin', value: 11.2, benchmark: 12.5 },
+  ];
+
+  const handleExport = () => {
+    const exportData = topCostCenters.map(center => ({
+      'Cost Center': center.name,
+      'Budget': center.budget,
+      'Actual': center.actual,
+      'Variance %': center.variance,
+    }));
+    ExportManager.toExcel(exportData, 'financial-report.xlsx');
+  };
+
+  const handleApplyFilters = (filters: FilterCriterion[]) => {
+    console.log('Applied filters:', filters);
+    // Apply filters to data
+  };
+
+  const filterFields = [
+    { key: 'costCenter', label: 'Cost Center', type: 'text' as const },
+    { key: 'variance', label: 'Variance %', type: 'number' as const },
+    { key: 'status', label: 'Status', type: 'select' as const, options: [
+      { value: 'on-track', label: 'On Track' },
+      { value: 'watch', label: 'Watch' },
+      { value: 'alert', label: 'Alert' },
+    ]},
+  ];
 
   const budgetAlerts = [
     {
@@ -128,9 +207,20 @@ export function FinanceDashboard() {
             <h1 className="text-3xl font-bold text-white">Financial Dashboard</h1>
             <p className="mt-1 text-sm text-gray-400">
               Healthcare Finance & Operations Analytics
+              {lastRefresh && (
+                <span className="ml-2">• Last updated: {lastRefresh.toLocaleTimeString()}</span>
+              )}
             </p>
           </div>
           <div className="flex gap-3">
+            <button
+              onClick={refresh}
+              disabled={isRefreshing}
+              className="px-4 py-2 bg-gray-800 hover:bg-gray-700 border border-gray-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+            >
+              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              Refresh
+            </button>
             <select
               value={selectedPeriod}
               onChange={(e) => setSelectedPeriod(e.target.value)}
@@ -142,10 +232,36 @@ export function FinanceDashboard() {
               <option>Q4 2025</option>
               <option>Annual 2025</option>
             </select>
-            <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors">
-              Export Report
+            <AdvancedFilter
+              fields={filterFields}
+              onApplyFilters={handleApplyFilters}
+              onClear={() => console.log('Filters cleared')}
+            />
+            <button
+              onClick={handleExport}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+            >
+              <Download className="w-4 h-4" />
+              Export
             </button>
           </div>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex gap-2 border-b border-gray-700">
+          {(['overview', 'trends', 'comparison', 'forecast'] as const).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-4 py-2 font-medium capitalize transition-colors ${
+                activeTab === tab
+                  ? 'text-blue-500 border-b-2 border-blue-500'
+                  : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              {tab}
+            </button>
+          ))}
         </div>
 
         {/* Key Metrics */}
@@ -350,9 +466,65 @@ export function FinanceDashboard() {
           </div>
         </Card>
 
+        {/* Tab Content */}
+        {activeTab === 'trends' && (
+          <div className="space-y-6">
+            <Card className="p-6">
+              <LineChart
+                data={revenueTrend}
+                title="Revenue Trend"
+                height={300}
+                color="#10b981"
+                formatValue={(v) => formatCurrency(v)}
+              />
+            </Card>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card className="p-6">
+                <BarChart
+                  data={revenueTrend}
+                  title="Monthly Revenue"
+                  height={250}
+                  formatValue={(v) => formatCurrency(v)}
+                />
+              </Card>
+              <Card className="p-6">
+                <DonutChart
+                  data={payerMixData}
+                  title="Payer Mix Distribution"
+                  size={220}
+                  formatValue={(v) => formatCurrency(v)}
+                />
+              </Card>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'comparison' && (
+          <Card className="p-6">
+            <ComparisonView
+              title="Performance vs. Industry Benchmarks"
+              data={benchmarkData}
+              formatValue={(v) => v >= 1000 ? formatCurrency(v) : v.toFixed(1)}
+              showBenchmarks={true}
+            />
+          </Card>
+        )}
+
+        {activeTab === 'forecast' && (
+          <Card className="p-6">
+            <ForecastChart
+              historicalData={historicalData}
+              forecastPeriods={6}
+              title="Revenue Forecast (Next 6 Months)"
+              formatValue={(v) => formatCurrency(v)}
+            />
+          </Card>
+        )}
+
         {/* Quick Actions */}
         <div className="flex gap-4">
-          <button className="flex-1 py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg font-semibold transition-all shadow-lg hover:shadow-xl">
+          <button className="flex-1 py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg font-semibold transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2">
+            <TrendingUp className="w-5 h-5" />
             Create Budget
           </button>
           <button className="flex-1 py-4 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white rounded-lg font-semibold transition-all shadow-lg hover:shadow-xl">
